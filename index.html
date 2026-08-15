@@ -4,9 +4,9 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <meta name="theme-color" content="#080b12">
-<title>FUN RACE 2026</title>
+<title>FUN RACE 2026 — Colour Quest</title>
 <style>
-:root{--bg:#080b12;--card:#111722;--line:#263043;--muted:#8d99ad;--white:#f8fafc;}
+:root{--bg:#080b12;--card:#111722;--line:#263043;--muted:#8d99ad;--white:#f8fafc}
 *{box-sizing:border-box}
 body{margin:0;background:radial-gradient(circle at top,#182235 0,#080b12 52%);color:var(--white);font-family:Arial,Helvetica,sans-serif;min-height:100vh;padding:16px}
 .app{max-width:560px;margin:auto}
@@ -14,24 +14,26 @@ body{margin:0;background:radial-gradient(circle at top,#182235 0,#080b12 52%);co
 .badge{display:inline-block;border:1px solid #334155;border-radius:999px;padding:7px 12px;font-size:11px;letter-spacing:1.5px;color:#cbd5e1}
 h1{font-size:34px;letter-spacing:2px;margin:13px 0 5px}
 .subtitle{color:var(--muted);font-size:14px}
-.teamReminder{margin-top:12px;padding:11px 13px;border:1px solid #7f1d1d;background:rgba(127,29,29,.18);border-radius:12px;color:#fecaca;font-size:12px;font-weight:800;line-height:1.45;text-align:center}
-.teamLocked{opacity:.72;cursor:not-allowed}
-.card{background:rgba(17,23,34,.94);border:1px solid var(--line);border-radius:24px;padding:20px;margin-top:14px;box-shadow:0 15px 45px rgba(0,0,0,.28)}
+.card{background:rgba(17,23,34,.96);border:1px solid var(--line);border-radius:24px;padding:20px;margin-top:14px;box-shadow:0 15px 45px rgba(0,0,0,.28)}
 label{font-size:12px;color:#aeb8c8;letter-spacing:.8px;text-transform:uppercase}
-select,input,button{width:100%;height:52px;border-radius:15px;margin-top:8px;font-size:16px}
+select,input,button{width:100%;min-height:52px;border-radius:15px;margin-top:8px;font-size:16px}
 select,input{background:#0b1019;color:white;border:1px solid #334155;padding:0 15px;outline:none}
 button{border:0;background:#f8fafc;color:#080b12;font-weight:900;letter-spacing:.7px;cursor:pointer}
-button:disabled{opacity:.5}
+button:disabled{opacity:.5;cursor:not-allowed}
 .status{text-align:center;min-height:23px;margin-top:10px;font-weight:800}
 .success{color:#86efac}.error{color:#fca5a5}
-.teamname{font-size:21px;font-weight:900;margin:3px 0 0}
+.teamname{font-size:21px;font-weight:900;margin:8px 0 0}
+.teamReminder{margin-top:12px;padding:11px 13px;border:1px solid #7f1d1d;background:rgba(127,29,29,.18);border-radius:12px;color:#fecaca;font-size:12px;font-weight:800;line-height:1.45;text-align:center}
+.taskReminder{margin-top:12px;padding:11px 13px;border:1px solid #854d0e;background:rgba(133,77,14,.16);border-radius:12px;color:#fde68a;font-size:12px;font-weight:800;line-height:1.45;text-align:center}
+.teamLocked{opacity:.72;cursor:not-allowed}
 .progressRow{display:flex;justify-content:space-between;align-items:end}
 .count{font-size:13px;color:#94a3b8}
 .progress{height:8px;background:#202938;border-radius:99px;overflow:hidden;margin-top:12px}
 .bar{height:100%;width:0%;background:linear-gradient(90deg,#38bdf8,#a78bfa);transition:.45s}
 .colors{display:flex;flex-wrap:nowrap;gap:10px;margin-top:14px;overflow-x:auto;overflow-y:hidden;padding:3px 2px 10px;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch}
-.slot{height:88px;min-width:calc((100% - 50px)/6);flex:0 0 calc((100% - 50px)/6);scroll-snap-align:start;border-radius:17px;background:#0b1019;border:1px dashed #344054;display:flex;align-items:center;justify-content:center;text-align:center;color:#58657a;font-weight:900;font-size:12px;transition:.4s}
-.slot small{font-size:10px;letter-spacing:.5px;opacity:.8}.slot.RED{background:#ef4444;color:white;border:0}.slot.BLUE{background:#3b82f6;color:white;border:0}
+.slot{height:88px;min-width:calc((100% - 50px)/6);flex:0 0 calc((100% - 50px)/6);scroll-snap-align:start;border-radius:17px;background:#0b1019;border:1px dashed #344054;display:flex;align-items:center;justify-content:center;text-align:center;color:#58657a;font-weight:900;font-size:12px;transition:.4s;line-height:1.3}
+.slot small{font-size:9px;letter-spacing:.5px;opacity:.8}
+.slot.RED{background:#ef4444;color:white;border:0}.slot.BLUE{background:#3b82f6;color:white;border:0}
 .slot.GREEN{background:#22c55e;color:white;border:0}.slot.YELLOW{background:#facc15;color:#111827;border:0}
 .slot.PURPLE{background:#a855f7;color:white;border:0}.slot.ORANGE{background:#f97316;color:white;border:0}
 .reveal{animation:pop .45s ease}
@@ -41,6 +43,10 @@ button:disabled{opacity:.5}
 .complete h2{margin:6px 0 8px}
 .note{font-size:13px;line-height:1.6;color:#aeb8c8}
 .footer{text-align:center;color:#536075;font-size:11px;padding:18px 0 4px}
+@media(max-width:650px){
+ .header{padding:10px 12px}
+ .colors .slot{min-width:92px;flex-basis:92px}
+}
 </style>
 </head>
 <body>
@@ -48,24 +54,46 @@ button:disabled{opacity:.5}
   <div class="header">
     <span class="badge">COMPANY FUN RACE 2026</span>
     <h1>COLOUR QUEST</h1>
-    <div class="subtitle">Complete the task • Enter the password • Unlock the colour</div>
+    <div class="subtitle">Complete any task • Enter its password • Build your fixed colour sequence</div>
   </div>
 
   <div class="card">
     <label>Team</label>
     <select id="team">
-      <option value="TEAM 1">TEAM 1 — Red Gladiator</option><option value="TEAM 2">TEAM 2 — PinkStorm</option><option value="TEAM 3">TEAM 3 — Diamond X</option><option value="TEAM 4">TEAM 4 — Navy Titan</option><option value="TEAM 5">TEAM 5 — Obsidian Elite</option><option value="TEAM 6">TEAM 6 — Onyx</option>
+      <option value="TEAM 1">TEAM 1 — Red Gladiator</option>
+      <option value="TEAM 2">TEAM 2 — PinkStorm</option>
+      <option value="TEAM 3">TEAM 3 — Diamond X</option>
+      <option value="TEAM 4">TEAM 4 — Navy Titan</option>
+      <option value="TEAM 5">TEAM 5 — Obsidian Elite</option>
+      <option value="TEAM 6">TEAM 6 — Onyx</option>
     </select>
-    <div class="teamReminder">⚠️ IMPORTANT: PLEASE CHOOSE THE CORRECT TEAM BEFORE ENTERING YOUR PASSWORD.<br>Team selection will be LOCKED after the first correct password.</div>
+
+    <div id="teamReminder" class="teamReminder">
+      ⚠️ IMPORTANT: CHOOSE THE CORRECT TEAM BEFORE ENTERING YOUR FIRST PASSWORD.<br>
+      Team selection will be LOCKED after the first correct password.
+    </div>
+
     <div id="teamName" class="teamname">Red Gladiator</div>
 
-    <div class="teamReminder" style="margin-top:16px;border-color:#854d0e;background:rgba(133,77,14,.16);color:#fde68a">🔐 Complete tasks in ANY order. Select the task you have completed, then enter its password. Colours will always be arranged in Task 1 → Task 6 order.</div>
-    <div id="taskIndicator" class="teamname" style="margin-top:14px;font-size:17px">
-      TASK 1 OF 6
+    <label style="display:block;margin-top:18px">Completed Task</label>
+    <select id="taskSelect">
+      <option value="1">TASK 1</option>
+      <option value="2">TASK 2</option>
+      <option value="3">TASK 3</option>
+      <option value="4">TASK 4</option>
+      <option value="5">TASK 5</option>
+      <option value="6">TASK 6</option>
+    </select>
+
+    <div class="taskReminder">
+      🔐 You may complete tasks in ANY ORDER. Select the task you have completed,
+      then enter that task's password. The colour will go into its fixed Task position.
     </div>
-    <label style="display:block;margin-top:10px">Task Password</label>
+
+    <label style="display:block;margin-top:16px">Task Password</label>
     <input id="password" maxlength="10" autocomplete="off" autocapitalize="characters"
            spellcheck="false" placeholder="Enter Task 1 password">
+
     <button id="unlockBtn" onclick="unlock()">🔓 UNLOCK COLOUR</button>
     <div id="msg" class="status"></div>
   </div>
@@ -76,8 +104,9 @@ button:disabled{opacity:.5}
         <div style="font-size:12px;color:#94a3b8;text-transform:uppercase">Colour Sequence — Task 1 → Task 6</div>
         <div id="count" style="font-size:22px;font-weight:900;margin-top:2px">0 / 6</div>
       </div>
-      <div class="count">6 tasks required</div>
+      <div class="count">Position is fixed</div>
     </div>
+
     <div class="progress"><div id="bar" class="bar"></div></div>
     <div id="colors" class="colors"></div>
   </div>
@@ -86,10 +115,9 @@ button:disabled{opacity:.5}
     <div class="completeIcon">🏆</div>
     <h2>ALL 6 COLOURS COLLECTED!</h2>
     <div class="note">
-      Team colour sequence is complete.<br><br>
-      Proceed to the <b>MEMORY BOX</b>.<br>
-      Memorise the value of each colour, then convert your team's colour
-      sequence into the <b>MASTER PASSWORD</b>.
+      Your final colour sequence is fixed from <b>Position 1 → Position 6</b>.<br><br>
+      Proceed to the <b>MEMORY BOX</b> and convert each colour into its number value
+      in this exact order to create your Master Password.
     </div>
   </div>
 
@@ -97,11 +125,24 @@ button:disabled{opacity:.5}
 </div>
 
 <script>
-const teamNames={"TEAM 1": "Red Gladiator", "TEAM 2": "PinkStorm", "TEAM 3": "Diamond X", "TEAM 4": "Navy Titan", "TEAM 5": "Obsidian Elite", "TEAM 6": "Onyx"};
-const state={colours:[null,null,null,null,null,null],used:new Set(),teamLocked:false};
+const teamNames={
+  "TEAM 1":"Red Gladiator",
+  "TEAM 2":"PinkStorm",
+  "TEAM 3":"Diamond X",
+  "TEAM 4":"Navy Titan",
+  "TEAM 5":"Obsidian Elite",
+  "TEAM 6":"Onyx"
+};
+
+const state={
+  colours:[null,null,null,null,null,null],
+  used:new Set(),
+  teamLocked:false
+};
 
 function renderSlots(){
-  const el=document.getElementById("colors"); el.innerHTML="";
+  const el=document.getElementById("colors");
+  el.innerHTML="";
   for(let i=0;i<6;i++){
     const s=document.createElement("div");
     s.className="slot";
@@ -109,6 +150,7 @@ function renderSlots(){
     el.appendChild(s);
   }
 }
+
 function updateHeader(){
   const team=document.getElementById("team").value;
   document.getElementById("teamName").textContent=teamNames[team];
@@ -119,130 +161,151 @@ function lockTeam(){
   const teamSelect=document.getElementById("team");
   teamSelect.disabled=true;
   teamSelect.classList.add("teamLocked");
-  document.querySelector(".teamReminder").innerHTML =
-    "🔒 TEAM LOCKED: <b>" + teamNames[teamSelect.value] +
-    "</b><br>All remaining passwords must be entered for this team.";
+  document.getElementById("teamReminder").innerHTML =
+    "🔒 TEAM LOCKED: <b>"+teamNames[teamSelect.value]+"</b><br>All remaining passwords must be entered for this team.";
 }
-function unlock(){
-  const team = document.getElementById("team").value;
-  const input = document.getElementById("password");
-  const password = input.value.trim().toUpperCase();
-  const task = Number(document.getElementById("taskSelect").value);
-  const btn = document.getElementById("unlockBtn");
-  const msg = document.getElementById("msg");
 
-  msg.className = "status";
-  msg.textContent = "";
+function updateTaskMessage(){
+  const task=document.getElementById("taskSelect").value;
+  const slot=state.colours[Number(task)-1];
+  const indicator=document.getElementById("password");
+  indicator.placeholder=slot ? "Task "+task+" already completed" : "Enter Task "+task+" password";
+  if(slot){
+    document.getElementById("msg").className="status success";
+    document.getElementById("msg").textContent="✓ Task "+task+" already unlocked: "+slot;
+  }else{
+    document.getElementById("msg").className="status";
+    document.getElementById("msg").textContent="";
+  }
+}
+
+function unlock(){
+  const team=document.getElementById("team").value;
+  const task=Number(document.getElementById("taskSelect").value);
+  const input=document.getElementById("password");
+  const password=input.value.trim().toUpperCase();
+  const btn=document.getElementById("unlockBtn");
+  const msg=document.getElementById("msg");
+
+  msg.className="status";
+  msg.textContent="";
+
+  if(state.colours[task-1]){
+    msg.classList.add("error");
+    msg.textContent="Task "+task+" is already completed.";
+    return;
+  }
 
   if(!/^[A-Z0-9]{10}$/.test(password)){
     msg.classList.add("error");
-    msg.textContent = "Password mesti 10 aksara.";
+    msg.textContent="Password mesti 10 aksara.";
     return;
   }
 
   if(state.used.has(password)){
     msg.classList.add("error");
-    msg.textContent = "Password ini sudah digunakan.";
+    msg.textContent="Password ini sudah digunakan.";
     return;
   }
 
-  btn.disabled = true;
-  btn.textContent = "CHECKING...";
+  btn.disabled=true;
+  btn.textContent="CHECKING...";
 
-  const callbackName = "funRaceCallback_" + Date.now();
-  const script = document.createElement("script");
+  const callbackName="funRaceCallback_"+Date.now()+"_"+Math.random().toString(36).slice(2);
+  const script=document.createElement("script");
 
-  const cleanup = () => {
-    btn.disabled = false;
-    btn.textContent = "🔓 UNLOCK COLOUR";
-    if(script.parentNode) script.parentNode.removeChild(script);
-    try { delete window[callbackName]; } catch(e) {}
+  const cleanup=()=>{
+    btn.disabled=false;
+    btn.textContent="🔓 UNLOCK COLOUR";
+    if(script.parentNode)script.parentNode.removeChild(script);
+    try{delete window[callbackName]}catch(e){}
   };
 
-  const timeout = setTimeout(() => {
+  const timeout=setTimeout(()=>{
     cleanup();
     msg.classList.add("error");
-    msg.textContent = "Connection timeout. Please try again.";
-  }, 12000);
+    msg.textContent="Connection timeout. Please try again.";
+  },12000);
 
-  window[callbackName] = function(r){
+  window[callbackName]=function(r){
     clearTimeout(timeout);
     cleanup();
 
     if(!r || !r.ok){
       msg.classList.add("error");
-      msg.textContent = (r && r.message) || "Wrong password.";
+      msg.textContent=(r&&r.message)||"Wrong password.";
       return;
     }
 
-    // Lock the selected team after the FIRST correct password.
-    // This prevents participants from switching to another team's password set.
-    if(!state.teamLocked){
-      lockTeam();
-    }
-
-    if(r.task !== state.currentTask){
+    if(Number(r.task)!==task){
       msg.classList.add("error");
-      msg.textContent = "Please complete Task " + state.currentTask + " first.";
+      msg.textContent="Task/password mismatch.";
       return;
     }
+
+    if(!state.teamLocked)lockTeam();
 
     state.used.add(password);
-    state.colours.push(r.color);
+    state.colours[task-1]=r.color;
 
-    const slots = document.querySelectorAll(".slot");
-    const slot = slots[state.colours.length - 1];
+    const slots=document.querySelectorAll(".slot");
+    const slot=slots[task-1];
+    slot.className="slot "+r.color+" reveal";
+    slot.innerHTML="<small>POSITION "+task+" • TASK "+task+"</small><br>"+r.color;
 
-    slot.className = "slot " + r.color + " reveal";
-    slot.textContent = r.color;
-
-    input.value = "";
+    input.value="";
     msg.classList.add("success");
-    msg.textContent = "✓ CORRECT — COLOUR UNLOCKED!";
+    msg.textContent="✓ TASK "+task+" COMPLETE — "+r.color+" UNLOCKED!";
 
-    document.getElementById("count").textContent =
-      state.colours.length + " / 6";
+    const completed=state.colours.filter(Boolean).length;
+    document.getElementById("count").textContent=completed+" / 6";
+    document.getElementById("bar").style.width=(completed/6*100)+"%";
 
-    document.getElementById("bar").style.width =
-      (state.colours.length / 6 * 100) + "%";
-
-    if(state.colours.length === 6){
-      document.getElementById("complete").style.display = "block";
-      setTimeout(() => {
-        document.getElementById("complete")
-          .scrollIntoView({behavior:"smooth"});
-      }, 250);
+    if(completed===6){
+      document.getElementById("complete").style.display="block";
+      setTimeout(()=>{
+        document.getElementById("complete").scrollIntoView({behavior:"smooth"});
+      },250);
     }
   };
 
-  const params = new URLSearchParams({
-    action: "check",
-    team: team,
-    task: task,
-    password: password,
-    callback: callbackName
+  const params=new URLSearchParams({
+    action:"check",
+    team:team,
+    task:String(task),
+    password:password,
+    callback:callbackName
   });
 
-  script.src =
-    "https://script.google.com/macros/s/AKfycbyXLvgF6QqlovNg9mSvNWlCvGKJJFcLVs7xfALSJ4-eZOqNyogwJ62qwuLhsojwxk8F3A/exec?" +
+  script.src=
+    "https://script.google.com/macros/s/AKfycbyXLvgF6QqlovNg9mSvNWlCvGKJJFcLVs7xfALSJ4-eZOqNyogwJ62qwuLhsojwxk8F3A/exec?"+
     params.toString();
 
-  script.onerror = function(){
+  script.onerror=function(){
     clearTimeout(timeout);
     cleanup();
     msg.classList.add("error");
-    msg.textContent = "Unable to connect to game server.";
+    msg.textContent="Unable to connect to game server.";
   };
 
   document.body.appendChild(script);
 }
-document.getElementById("team").addEventListener("change",updateHeader);
-document.getElementById("taskSelect").addEventListener("change", function(){
-  document.getElementById("taskIndicator").textContent =
-    "Enter the password for Task " + this.value + ".";
+
+document.getElementById("team").addEventListener("change",function(){
+  if(state.teamLocked){
+    this.value=Object.keys(teamNames).find(k=>teamNames[k]===document.getElementById("teamName").textContent)||this.value;
+    return;
+  }
+  updateHeader();
 });
-document.getElementById("password").addEventListener("keydown",e=>{if(e.key==="Enter")unlock()});
-renderSlots(); updateHeader();
+
+document.getElementById("taskSelect").addEventListener("change",updateTaskMessage);
+document.getElementById("password").addEventListener("keydown",e=>{
+  if(e.key==="Enter")unlock();
+});
+
+renderSlots();
+updateHeader();
 </script>
 </body>
 </html>
