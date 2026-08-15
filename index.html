@@ -24,7 +24,6 @@ button:disabled{opacity:.5;cursor:not-allowed}
 .success{color:#86efac}.error{color:#fca5a5}
 .teamname{font-size:21px;font-weight:900;margin:8px 0 0}
 .teamReminder{margin-top:12px;padding:11px 13px;border:1px solid #7f1d1d;background:rgba(127,29,29,.18);border-radius:12px;color:#fecaca;font-size:12px;font-weight:800;line-height:1.45;text-align:center}
-.taskReminder{margin-top:12px;padding:11px 13px;border:1px solid #854d0e;background:rgba(133,77,14,.16);border-radius:12px;color:#fde68a;font-size:12px;font-weight:800;line-height:1.45;text-align:center}
 .teamLocked{opacity:.72;cursor:not-allowed}
 .progressRow{display:flex;justify-content:space-between;align-items:end}
 .count{font-size:13px;color:#94a3b8}
@@ -44,8 +43,8 @@ button:disabled{opacity:.5;cursor:not-allowed}
 .note{font-size:13px;line-height:1.6;color:#aeb8c8}
 .footer{text-align:center;color:#536075;font-size:11px;padding:18px 0 4px}
 @media(max-width:650px){
- .header{padding:10px 12px}
- .colors .slot{min-width:92px;flex-basis:92px}
+  .header{padding:10px 12px}
+  .colors .slot{min-width:92px;flex-basis:92px}
 }
 </style>
 </head>
@@ -54,7 +53,7 @@ button:disabled{opacity:.5;cursor:not-allowed}
   <div class="header">
     <span class="badge">COMPANY FUN RACE 2026</span>
     <h1>COLOUR QUEST</h1>
-    <div class="subtitle">Complete any task • Enter its password • Build your fixed colour sequence</div>
+    <div class="subtitle">Complete any task • Enter the password • Build your colour sequence</div>
   </div>
 
   <div class="card">
@@ -75,24 +74,9 @@ button:disabled{opacity:.5;cursor:not-allowed}
 
     <div id="teamName" class="teamname">Red Gladiator</div>
 
-    <label style="display:block;margin-top:18px">Completed Task</label>
-    <select id="taskSelect">
-      <option value="1">TASK 1</option>
-      <option value="2">TASK 2</option>
-      <option value="3">TASK 3</option>
-      <option value="4">TASK 4</option>
-      <option value="5">TASK 5</option>
-      <option value="6">TASK 6</option>
-    </select>
-
-    <div class="taskReminder">
-      🔐 You may complete tasks in ANY ORDER. Select the task you have completed,
-      then enter that task's password. The colour will go into its fixed Task position.
-    </div>
-
-    <label style="display:block;margin-top:16px">Task Password</label>
+    <label style="display:block;margin-top:20px">Password</label>
     <input id="password" maxlength="10" autocomplete="off" autocapitalize="characters"
-           spellcheck="false" placeholder="Enter Task 1 password">
+           spellcheck="false" placeholder="Enter 10-character password">
 
     <button id="unlockBtn" onclick="unlock()">🔓 UNLOCK COLOUR</button>
     <div id="msg" class="status"></div>
@@ -104,7 +88,7 @@ button:disabled{opacity:.5;cursor:not-allowed}
         <div style="font-size:12px;color:#94a3b8;text-transform:uppercase">Colour Sequence — Task 1 → Task 6</div>
         <div id="count" style="font-size:22px;font-weight:900;margin-top:2px">0 / 6</div>
       </div>
-      <div class="count">Position is fixed</div>
+      <div class="count">Fixed position</div>
     </div>
 
     <div class="progress"><div id="bar" class="bar"></div></div>
@@ -116,7 +100,7 @@ button:disabled{opacity:.5;cursor:not-allowed}
     <h2>ALL 6 COLOURS COLLECTED!</h2>
     <div class="note">
       Your final colour sequence is fixed from <b>Position 1 → Position 6</b>.<br><br>
-      Proceed to the <b>MEMORY BOX</b> and convert each colour into its number value
+      Proceed to the <b>MEMORY BOX</b> and convert the colours into their number values
       in this exact order to create your Master Password.
     </div>
   </div>
@@ -165,23 +149,8 @@ function lockTeam(){
     "🔒 TEAM LOCKED: <b>"+teamNames[teamSelect.value]+"</b><br>All remaining passwords must be entered for this team.";
 }
 
-function updateTaskMessage(){
-  const task=document.getElementById("taskSelect").value;
-  const slot=state.colours[Number(task)-1];
-  const indicator=document.getElementById("password");
-  indicator.placeholder=slot ? "Task "+task+" already completed" : "Enter Task "+task+" password";
-  if(slot){
-    document.getElementById("msg").className="status success";
-    document.getElementById("msg").textContent="✓ Task "+task+" already unlocked: "+slot;
-  }else{
-    document.getElementById("msg").className="status";
-    document.getElementById("msg").textContent="";
-  }
-}
-
 function unlock(){
   const team=document.getElementById("team").value;
-  const task=Number(document.getElementById("taskSelect").value);
   const input=document.getElementById("password");
   const password=input.value.trim().toUpperCase();
   const btn=document.getElementById("unlockBtn");
@@ -189,12 +158,6 @@ function unlock(){
 
   msg.className="status";
   msg.textContent="";
-
-  if(state.colours[task-1]){
-    msg.classList.add("error");
-    msg.textContent="Task "+task+" is already completed.";
-    return;
-  }
 
   if(!/^[A-Z0-9]{10}$/.test(password)){
     msg.classList.add("error");
@@ -237,25 +200,28 @@ function unlock(){
       return;
     }
 
-    if(Number(r.task)!==task){
+    if(state.colours[r.task-1]){
       msg.classList.add("error");
-      msg.textContent="Task/password mismatch.";
+      msg.textContent="This task has already been unlocked.";
       return;
     }
 
-    if(!state.teamLocked)lockTeam();
+    if(!state.teamLocked){
+      lockTeam();
+    }
 
     state.used.add(password);
-    state.colours[task-1]=r.color;
+    state.colours[r.task-1]=r.color;
 
     const slots=document.querySelectorAll(".slot");
-    const slot=slots[task-1];
+    const slot=slots[r.task-1];
+
     slot.className="slot "+r.color+" reveal";
-    slot.innerHTML="<small>POSITION "+task+" • TASK "+task+"</small><br>"+r.color;
+    slot.innerHTML="<small>POSITION "+r.task+" • TASK "+r.task+"</small><br>"+r.color;
 
     input.value="";
     msg.classList.add("success");
-    msg.textContent="✓ TASK "+task+" COMPLETE — "+r.color+" UNLOCKED!";
+    msg.textContent="✓ TASK "+r.task+" PASSWORD ACCEPTED — "+r.color+" UNLOCKED!";
 
     const completed=state.colours.filter(Boolean).length;
     document.getElementById("count").textContent=completed+" / 6";
@@ -272,7 +238,6 @@ function unlock(){
   const params=new URLSearchParams({
     action:"check",
     team:team,
-    task:String(task),
     password:password,
     callback:callbackName
   });
@@ -291,15 +256,7 @@ function unlock(){
   document.body.appendChild(script);
 }
 
-document.getElementById("team").addEventListener("change",function(){
-  if(state.teamLocked){
-    this.value=Object.keys(teamNames).find(k=>teamNames[k]===document.getElementById("teamName").textContent)||this.value;
-    return;
-  }
-  updateHeader();
-});
-
-document.getElementById("taskSelect").addEventListener("change",updateTaskMessage);
+document.getElementById("team").addEventListener("change",updateHeader);
 document.getElementById("password").addEventListener("keydown",e=>{
   if(e.key==="Enter")unlock();
 });
