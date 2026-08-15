@@ -112,6 +112,49 @@ button:disabled{opacity:.35;cursor:not-allowed;filter:grayscale(1)}
 .teamname{font-family:var(--font-display);font-size:clamp(19px,5.5vw,22px);font-weight:800;margin:8px 0 0;letter-spacing:.4px}
 .teamReminder{margin-top:12px;padding:11px 13px;border:1px solid #7f1d1d;background:rgba(127,29,29,.18);border-radius:12px;color:#fecaca;font-size:12px;font-weight:700;line-height:1.5;text-align:center}
 .teamLocked{opacity:.72;cursor:not-allowed}
+
+/* Team selection cards (replaces plain <select>) */
+.teamGrid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-top:8px}
+.teamCard{
+  --accent:#38bdf8;
+  width:100%;min-height:64px;border-radius:14px;margin:0;
+  background:#0b1019;border:1.5px solid #263043;
+  color:#e2e8f0;cursor:pointer;text-align:left;padding:10px 12px;
+  display:flex;flex-direction:column;justify-content:center;gap:2px;
+  transition:border-color .18s ease,background .18s ease,transform .12s ease,box-shadow .18s ease;
+  font-family:var(--font-body);
+}
+.teamCard:active{transform:scale(.97)}
+.teamCardName{font-family:var(--font-display);font-weight:800;font-size:14.5px;letter-spacing:.5px;color:var(--accent)}
+.teamCardSub{font-size:11.5px;color:#8d99ad;font-weight:600}
+.teamCard.selected{
+  border-color:var(--accent);
+  background:linear-gradient(135deg,rgba(255,255,255,.05),rgba(255,255,255,0)),#0b1019;
+  box-shadow:0 0 0 1px var(--accent),0 8px 22px -6px var(--accent);
+}
+.teamCard.selected .teamCardSub{color:#cbd5e1}
+.teamGrid.locked .teamCard{pointer-events:none}
+.teamGrid.locked .teamCard:not(.selected){opacity:.32}
+.teamGrid.locked .teamCard.selected{opacity:1}
+
+/* Master Code OTP-style boxes */
+.otpRow{display:flex;gap:clamp(5px,1.6vw,8px);margin-top:8px}
+.otpBox{
+  flex:1;min-width:0;min-height:56px;text-align:center;
+  font-family:var(--font-display);font-size:clamp(20px,6vw,26px);font-weight:800;
+  letter-spacing:0;padding:0;margin-top:0;
+}
+
+/* Checkpoint dots above the progress bar */
+.checkpoints{display:flex;justify-content:space-between;margin-top:12px;gap:4px}
+.checkpoint{
+  width:clamp(24px,7vw,30px);height:clamp(24px,7vw,30px);border-radius:50%;
+  background:#0b1019;border:1.5px solid #344054;color:#58657a;
+  display:flex;align-items:center;justify-content:center;
+  font-family:var(--font-display);font-weight:800;font-size:clamp(10px,3vw,12px);
+  transition:.35s;flex-shrink:0;
+}
+.checkpoint.done{border:0;color:#0b1019;transform:scale(1.06);box-shadow:0 4px 12px -2px rgba(0,0,0,.4)}
 .progressRow{display:flex;justify-content:space-between;align-items:end;gap:8px}
 .progressRow .label-sm{font-size:11.5px;color:#94a3b8;text-transform:uppercase;letter-spacing:.6px;font-weight:700}
 .count{font-size:12.5px;color:#94a3b8;font-weight:600}
@@ -318,15 +361,32 @@ button:disabled{opacity:.35;cursor:not-allowed;filter:grayscale(1)}
 
   <div id="startCard" class="card">
     <label>Team</label>
-    <select id="team">
-      <option value="" selected disabled>▼ PLEASE SELECT YOUR TEAM</option>
-      <option value="TEAM 1">TEAM 1 — Red Gladiator</option>
-      <option value="TEAM 2">TEAM 2 — PinkStorm</option>
-      <option value="TEAM 3">TEAM 3 — Diamond X</option>
-      <option value="TEAM 4">TEAM 4 — Navy Titan</option>
-      <option value="TEAM 5">TEAM 5 — Obsidian Elite</option>
-      <option value="TEAM 6">TEAM 6 — Onyx</option>
-    </select>
+    <div id="teamGrid" class="teamGrid">
+      <button type="button" class="teamCard" style="--accent:#ef4444" data-team="TEAM 1" onclick="selectTeam('TEAM 1')">
+        <span class="teamCardName">TEAM 1</span>
+        <span class="teamCardSub">Red Gladiator</span>
+      </button>
+      <button type="button" class="teamCard" style="--accent:#ec4899" data-team="TEAM 2" onclick="selectTeam('TEAM 2')">
+        <span class="teamCardName">TEAM 2</span>
+        <span class="teamCardSub">PinkStorm</span>
+      </button>
+      <button type="button" class="teamCard" style="--accent:#38bdf8" data-team="TEAM 3" onclick="selectTeam('TEAM 3')">
+        <span class="teamCardName">TEAM 3</span>
+        <span class="teamCardSub">Diamond X</span>
+      </button>
+      <button type="button" class="teamCard" style="--accent:#3b82f6" data-team="TEAM 4" onclick="selectTeam('TEAM 4')">
+        <span class="teamCardName">TEAM 4</span>
+        <span class="teamCardSub">Navy Titan</span>
+      </button>
+      <button type="button" class="teamCard" style="--accent:#a855f7" data-team="TEAM 5" onclick="selectTeam('TEAM 5')">
+        <span class="teamCardName">TEAM 5</span>
+        <span class="teamCardSub">Obsidian Elite</span>
+      </button>
+      <button type="button" class="teamCard" style="--accent:#f59e0b" data-team="TEAM 6" onclick="selectTeam('TEAM 6')">
+        <span class="teamCardName">TEAM 6</span>
+        <span class="teamCardSub">Onyx</span>
+      </button>
+    </div>
 
     <div id="teamReminder" class="teamReminder">
       ⚠️ CHOOSE THE CORRECT TEAM. Team selection will be locked after START GAME.
@@ -365,6 +425,7 @@ button:disabled{opacity:.35;cursor:not-allowed;filter:grayscale(1)}
     </div>
 
     <div class="progress"><div id="bar" class="bar"></div></div>
+    <div id="checkpoints" class="checkpoints"></div>
     <div id="colors" class="colors"></div>
   </div>
 
@@ -377,7 +438,15 @@ button:disabled{opacity:.35;cursor:not-allowed;filter:grayscale(1)}
       <div id="finalColours" class="colors" style="margin-top:18px"></div>
     </div>
     <label style="display:block;margin-top:18px">Master Code</label>
-    <input id="masterCode" inputmode="numeric" maxlength="6" autocomplete="off" placeholder="Enter 6-digit Master Code">
+    <div id="otpRow" class="otpRow">
+      <input class="otpBox" inputmode="numeric" maxlength="1" autocomplete="off" data-idx="0">
+      <input class="otpBox" inputmode="numeric" maxlength="1" autocomplete="off" data-idx="1">
+      <input class="otpBox" inputmode="numeric" maxlength="1" autocomplete="off" data-idx="2">
+      <input class="otpBox" inputmode="numeric" maxlength="1" autocomplete="off" data-idx="3">
+      <input class="otpBox" inputmode="numeric" maxlength="1" autocomplete="off" data-idx="4">
+      <input class="otpBox" inputmode="numeric" maxlength="1" autocomplete="off" data-idx="5">
+    </div>
+    <input type="hidden" id="masterCode" value="">
     <button id="finishBtn" onclick="finishGame()">🏁 SUBMIT MASTER CODE</button>
     <div id="finishMsg" class="status"></div>
   </div>
@@ -410,6 +479,31 @@ const state={
   timer:null
 };
 
+let selectedTeam="";
+
+// ---- Haptic feedback (mobile only, silently ignored elsewhere) ----
+function vibrate(pattern){
+  try{ if(navigator.vibrate) navigator.vibrate(pattern); }catch(e){}
+}
+
+// ---- Animated "..." dots for loading button states ----
+function startLoadingAnim(btn,label){
+  btn.dataset.loading="1";
+  btn.dataset.loadDots="0";
+  clearInterval(btn._loadTimer);
+  btn.textContent=label;
+  btn._loadTimer=setInterval(()=>{
+    if(btn.dataset.loading!=="1"){clearInterval(btn._loadTimer);return;}
+    const d=(Number(btn.dataset.loadDots)+1)%4;
+    btn.dataset.loadDots=String(d);
+    btn.textContent=label+".".repeat(d);
+  },350);
+}
+function stopLoadingAnim(btn){
+  btn.dataset.loading="0";
+  clearInterval(btn._loadTimer);
+}
+
 function renderSlots(){
   const els=[document.getElementById("colors"),document.getElementById("finalColours")].filter(Boolean);
   els.forEach(el=>{
@@ -421,20 +515,51 @@ function renderSlots(){
       el.appendChild(s);
     }
   });
+  renderCheckpoints();
+}
+
+function renderCheckpoints(){
+  const el=document.getElementById("checkpoints");
+  if(!el)return;
+  el.innerHTML="";
+  for(let i=0;i<6;i++){
+    const c=document.createElement("div");
+    const colour=state.colours[i];
+    c.className="checkpoint"+(colour?" done":"");
+    c.textContent=colour?"✓":String(i+1);
+    if(colour){
+      const hex={RED:"#ef4444",BLUE:"#3b82f6",GREEN:"#22c55e",YELLOW:"#facc15",PURPLE:"#a855f7",ORANGE:"#f97316"}[colour]||"#38bdf8";
+      c.style.background=hex;
+      c.style.color=(colour==="YELLOW")?"#111827":"#ffffff";
+    }
+    el.appendChild(c);
+  }
 }
 
 function updateHeader(){
-  const team=document.getElementById("team").value;
-  document.getElementById("teamName").textContent=team ? teamNames[team] : "Please select your team";
+  document.getElementById("teamName").textContent=selectedTeam ? teamNames[selectedTeam] : "Please select your team";
+}
+
+function selectTeam(team){
+  if(state.teamLocked)return;
+  selectedTeam=team;
+  document.querySelectorAll(".teamCard").forEach(el=>{
+    el.classList.toggle("selected", el.getAttribute("data-team")===team);
+  });
+  updateHeader();
+  vibrate(10);
+
+  const startBtn=document.getElementById("startBtn");
+  startBtn.disabled=false;
+  startBtn.style.opacity="1";
+  startBtn.style.cursor="pointer";
 }
 
 function lockTeam(){
   state.teamLocked=true;
-  const teamSelect=document.getElementById("team");
-  teamSelect.disabled=true;
-  teamSelect.classList.add("teamLocked");
+  document.getElementById("teamGrid").classList.add("locked");
   document.getElementById("teamReminder").innerHTML=
-    "🔒 TEAM LOCKED: <b>"+teamNames[teamSelect.value]+"</b>";
+    "🔒 TEAM LOCKED: <b>"+teamNames[selectedTeam]+"</b>";
 }
 
 function jsonp(params, callback, onTimeout){
@@ -472,7 +597,7 @@ function jsonp(params, callback, onTimeout){
 }
 
 function startGame(){
-  const team=document.getElementById("team").value;
+  const team=selectedTeam;
   if(!team){
     const msg=document.getElementById("startMsg");
     msg.className="status error";
@@ -483,7 +608,7 @@ function startGame(){
   const msg=document.getElementById("startMsg");
 
   btn.disabled=true;
-  btn.textContent="STARTING...";
+  startLoadingAnim(btn,"STARTING");
   msg.className="status";
   msg.textContent="";
 
@@ -491,11 +616,13 @@ function startGame(){
     {action:"start",team:team},
     r=>{
       btn.disabled=false;
+      stopLoadingAnim(btn);
       btn.textContent="▶ START GAME";
 
       if(!r || !r.ok){
         msg.className="status error";
         msg.textContent=(r&&r.message)||"Unable to start game.";
+        vibrate(80);
         return;
       }
 
@@ -503,6 +630,7 @@ function startGame(){
       state.token=r.token;
       state.startMs=Number(r.startMs);
       lockTeam();
+      vibrate(15);
 
       document.getElementById("gameCard").style.display="block";
       document.getElementById("colourCard").style.display="block";
@@ -515,6 +643,7 @@ function startGame(){
     },
     ()=>{
       btn.disabled=false;
+      stopLoadingAnim(btn);
       btn.textContent="▶ START GAME";
       msg.className="status error";
       msg.textContent="Unable to connect to game server.";
@@ -549,7 +678,7 @@ function unlock(){
     return;
   }
 
-  const team=document.getElementById("team").value;
+  const team=selectedTeam;
   const input=document.getElementById("password");
   const password=input.value.trim().toUpperCase();
   const btn=document.getElementById("unlockBtn");
@@ -561,33 +690,38 @@ function unlock(){
   if(!/^[A-Z0-9]{10}$/.test(password)){
     msg.className="status error";
     msg.textContent="Password mesti 10 aksara.";
+    vibrate(80);
     return;
   }
 
   if(state.used.has(password)){
     msg.className="status error";
     msg.textContent="Password ini sudah digunakan.";
+    vibrate(80);
     return;
   }
 
   btn.disabled=true;
-  btn.textContent="CHECKING...";
+  startLoadingAnim(btn,"CHECKING");
 
   jsonp(
     {action:"check",team:team,password:password},
     r=>{
       btn.disabled=false;
+      stopLoadingAnim(btn);
       btn.textContent="🔓 UNLOCK COLOUR";
 
       if(!r || !r.ok){
         msg.className="status error";
         msg.textContent=(r&&r.message)||"Wrong password.";
+        vibrate(80);
         return;
       }
 
       if(state.colours[r.task-1]){
         msg.className="status error";
         msg.textContent="This task has already been unlocked.";
+        vibrate(80);
         return;
       }
 
@@ -597,10 +731,12 @@ function unlock(){
       const slot=document.querySelectorAll("#colors .slot")[r.task-1];
       slot.className="slot "+r.color+" reveal";
       slot.textContent=r.color;
+      renderCheckpoints();
 
       input.value="";
       msg.className="status success";
       msg.textContent="✓ PASSWORD ACCEPTED — "+r.color+" UNLOCKED!";
+      vibrate([15,40,15]);
 
       const completed=state.colours.filter(Boolean).length;
       document.getElementById("count").textContent=completed+" / 6";
@@ -612,6 +748,7 @@ function unlock(){
     },
     ()=>{
       btn.disabled=false;
+      stopLoadingAnim(btn);
       btn.textContent="🔓 UNLOCK COLOUR";
       msg.className="status error";
       msg.textContent="Unable to connect to game server.";
@@ -643,6 +780,7 @@ function finishGame(){
   if(!/^\d{6}$/.test(code)){
     msg.className="status error";
     msg.textContent="Master Code mesti 6 digit.";
+    vibrate(80);
     return;
   }
 
@@ -653,22 +791,24 @@ function finishGame(){
   }
 
   btn.disabled=true;
-  btn.textContent="CHECKING MASTER CODE...";
+  startLoadingAnim(btn,"CHECKING MASTER CODE");
 
   jsonp(
     {
       action:"finish",
-      team:document.getElementById("team").value,
+      team:selectedTeam,
       token:state.token,
       masterCode:code
     },
     r=>{
       btn.disabled=false;
+      stopLoadingAnim(btn);
       btn.textContent="🏁 SUBMIT MASTER CODE";
 
       if(!r || !r.ok){
         msg.className="status error";
         msg.textContent=(r&&r.message)||"Incorrect Master Code.";
+        vibrate(120);
         return;
       }
 
@@ -696,10 +836,12 @@ function finishGame(){
       overlay.classList.add("show");
       overlay.setAttribute("aria-hidden","false");
       document.body.style.overflow="hidden";
+      vibrate([20,50,20,50,40]);
       setTimeout(celebrateFinish,180);
     },
     ()=>{
       btn.disabled=false;
+      stopLoadingAnim(btn);
       btn.textContent="🏁 SUBMIT MASTER CODE";
       msg.className="status error";
       msg.textContent="Unable to connect to game server.";
@@ -707,23 +849,45 @@ function finishGame(){
   );
 }
 
-document.getElementById("team").addEventListener("change",function(){
-  const selected=this.value;
-  updateHeader();
-  const startBtn=document.getElementById("startBtn");
-  startBtn.disabled = selected === "";
-  startBtn.style.opacity = selected === "" ? "0.35" : "1";
-  startBtn.style.cursor = selected === "" ? "not-allowed" : "pointer";
-});
 document.getElementById("password").addEventListener("keydown",e=>{
   if(e.key==="Enter")unlock();
-});
-document.getElementById("masterCode").addEventListener("keydown",e=>{
-  if(e.key==="Enter")finishGame();
 });
 document.getElementById("celebrateAgain").addEventListener("click",()=>{
   celebrateFinish();
 });
+
+// ---- Master Code OTP boxes: auto-advance, backspace-back, paste support ----
+function setupOtpBoxes(){
+  const boxes=[...document.querySelectorAll(".otpBox")];
+  const hidden=document.getElementById("masterCode");
+
+  function syncHidden(){
+    hidden.value=boxes.map(b=>b.value).join("");
+  }
+
+  boxes.forEach((box,i)=>{
+    box.addEventListener("input",()=>{
+      box.value=box.value.replace(/[^0-9]/g,"").slice(0,1);
+      syncHidden();
+      if(box.value && i<boxes.length-1) boxes[i+1].focus();
+    });
+    box.addEventListener("keydown",e=>{
+      if(e.key==="Backspace" && !box.value && i>0){
+        boxes[i-1].focus();
+      }
+      if(e.key==="Enter") finishGame();
+    });
+    box.addEventListener("paste",e=>{
+      e.preventDefault();
+      const text=(e.clipboardData||window.clipboardData).getData("text").replace(/[^0-9]/g,"").slice(0,6);
+      text.split("").forEach((ch,idx)=>{ if(boxes[idx]) boxes[idx].value=ch; });
+      syncHidden();
+      const nextEmpty=boxes.findIndex(b=>!b.value);
+      boxes[nextEmpty===-1?boxes.length-1:nextEmpty].focus();
+    });
+  });
+}
+setupOtpBoxes();
 
 renderSlots();
 updateHeader();
