@@ -29,9 +29,9 @@ button:disabled{opacity:.5}
 .count{font-size:13px;color:#94a3b8}
 .progress{height:8px;background:#202938;border-radius:99px;overflow:hidden;margin-top:12px}
 .bar{height:100%;width:0%;background:linear-gradient(90deg,#38bdf8,#a78bfa);transition:.45s}
-.colors{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:14px}
-.slot{height:88px;border-radius:17px;background:#0b1019;border:1px dashed #344054;display:flex;align-items:center;justify-content:center;text-align:center;color:#58657a;font-weight:900;font-size:12px;transition:.4s}
-.slot.RED{background:#ef4444;color:white;border:0}.slot.BLUE{background:#3b82f6;color:white;border:0}
+.colors{display:flex;flex-wrap:nowrap;gap:10px;margin-top:14px;overflow-x:auto;overflow-y:hidden;padding:3px 2px 10px;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch}
+.slot{height:88px;min-width:calc((100% - 50px)/6);flex:0 0 calc((100% - 50px)/6);scroll-snap-align:start;border-radius:17px;background:#0b1019;border:1px dashed #344054;display:flex;align-items:center;justify-content:center;text-align:center;color:#58657a;font-weight:900;font-size:12px;transition:.4s}
+.slot small{font-size:10px;letter-spacing:.5px;opacity:.8}.slot.RED{background:#ef4444;color:white;border:0}.slot.BLUE{background:#3b82f6;color:white;border:0}
 .slot.GREEN{background:#22c55e;color:white;border:0}.slot.YELLOW{background:#facc15;color:#111827;border:0}
 .slot.PURPLE{background:#a855f7;color:white;border:0}.slot.ORANGE{background:#f97316;color:white;border:0}
 .reveal{animation:pop .45s ease}
@@ -59,9 +59,13 @@ button:disabled{opacity:.5}
     <div class="teamReminder">⚠️ IMPORTANT: PLEASE CHOOSE THE CORRECT TEAM BEFORE ENTERING YOUR PASSWORD.<br>Team selection will be LOCKED after the first correct password.</div>
     <div id="teamName" class="teamname">Red Gladiator</div>
 
-    <label style="display:block;margin-top:18px">Task Password</label>
+    <div class="teamReminder" style="margin-top:16px;border-color:#854d0e;background:rgba(133,77,14,.16);color:#fde68a">🔐 Complete tasks in ANY order. Select the task you have completed, then enter its password. Colours will always be arranged in Task 1 → Task 6 order.</div>
+    <div id="taskIndicator" class="teamname" style="margin-top:14px;font-size:17px">
+      TASK 1 OF 6
+    </div>
+    <label style="display:block;margin-top:10px">Task Password</label>
     <input id="password" maxlength="10" autocomplete="off" autocapitalize="characters"
-           spellcheck="false" placeholder="Enter 10-character password">
+           spellcheck="false" placeholder="Enter Task 1 password">
     <button id="unlockBtn" onclick="unlock()">🔓 UNLOCK COLOUR</button>
     <div id="msg" class="status"></div>
   </div>
@@ -69,7 +73,7 @@ button:disabled{opacity:.5}
   <div class="card">
     <div class="progressRow">
       <div>
-        <div style="font-size:12px;color:#94a3b8;text-transform:uppercase">Colour Collection</div>
+        <div style="font-size:12px;color:#94a3b8;text-transform:uppercase">Colour Sequence — Task 1 → Task 6</div>
         <div id="count" style="font-size:22px;font-weight:900;margin-top:2px">0 / 6</div>
       </div>
       <div class="count">6 tasks required</div>
@@ -94,14 +98,14 @@ button:disabled{opacity:.5}
 
 <script>
 const teamNames={"TEAM 1": "Red Gladiator", "TEAM 2": "PinkStorm", "TEAM 3": "Diamond X", "TEAM 4": "Navy Titan", "TEAM 5": "Obsidian Elite", "TEAM 6": "Onyx"};
-const state={colours:[],used:new Set(),teamLocked:false};
+const state={colours:[null,null,null,null,null,null],used:new Set(),teamLocked:false};
 
 function renderSlots(){
   const el=document.getElementById("colors"); el.innerHTML="";
   for(let i=0;i<6;i++){
     const s=document.createElement("div");
     s.className="slot";
-    s.textContent="CLUE "+(i+1);
+    s.innerHTML="<small>POSITION "+(i+1)+"</small><br>LOCKED";
     el.appendChild(s);
   }
 }
@@ -123,6 +127,7 @@ function unlock(){
   const team = document.getElementById("team").value;
   const input = document.getElementById("password");
   const password = input.value.trim().toUpperCase();
+  const task = Number(document.getElementById("taskSelect").value);
   const btn = document.getElementById("unlockBtn");
   const msg = document.getElementById("msg");
 
@@ -176,6 +181,12 @@ function unlock(){
       lockTeam();
     }
 
+    if(r.task !== state.currentTask){
+      msg.classList.add("error");
+      msg.textContent = "Please complete Task " + state.currentTask + " first.";
+      return;
+    }
+
     state.used.add(password);
     state.colours.push(r.color);
 
@@ -207,6 +218,7 @@ function unlock(){
   const params = new URLSearchParams({
     action: "check",
     team: team,
+    task: task,
     password: password,
     callback: callbackName
   });
@@ -225,6 +237,10 @@ function unlock(){
   document.body.appendChild(script);
 }
 document.getElementById("team").addEventListener("change",updateHeader);
+document.getElementById("taskSelect").addEventListener("change", function(){
+  document.getElementById("taskIndicator").textContent =
+    "Enter the password for Task " + this.value + ".";
+});
 document.getElementById("password").addEventListener("keydown",e=>{if(e.key==="Enter")unlock()});
 renderSlots(); updateHeader();
 </script>
