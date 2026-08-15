@@ -14,6 +14,8 @@ body{margin:0;background:radial-gradient(circle at top,#182235 0,#080b12 52%);co
 .badge{display:inline-block;border:1px solid #334155;border-radius:999px;padding:7px 12px;font-size:11px;letter-spacing:1.5px;color:#cbd5e1}
 h1{font-size:34px;letter-spacing:2px;margin:13px 0 5px}
 .subtitle{color:var(--muted);font-size:14px}
+.teamReminder{margin-top:12px;padding:11px 13px;border:1px solid #7f1d1d;background:rgba(127,29,29,.18);border-radius:12px;color:#fecaca;font-size:12px;font-weight:800;line-height:1.45;text-align:center}
+.teamLocked{opacity:.72;cursor:not-allowed}
 .card{background:rgba(17,23,34,.94);border:1px solid var(--line);border-radius:24px;padding:20px;margin-top:14px;box-shadow:0 15px 45px rgba(0,0,0,.28)}
 label{font-size:12px;color:#aeb8c8;letter-spacing:.8px;text-transform:uppercase}
 select,input,button{width:100%;height:52px;border-radius:15px;margin-top:8px;font-size:16px}
@@ -54,6 +56,7 @@ button:disabled{opacity:.5}
     <select id="team">
       <option value="TEAM 1">TEAM 1 — Red Gladiator</option><option value="TEAM 2">TEAM 2 — PinkStorm</option><option value="TEAM 3">TEAM 3 — Diamond X</option><option value="TEAM 4">TEAM 4 — Navy Titan</option><option value="TEAM 5">TEAM 5 — Obsidian Elite</option><option value="TEAM 6">TEAM 6 — Onyx</option>
     </select>
+    <div class="teamReminder">⚠️ IMPORTANT: PLEASE CHOOSE THE CORRECT TEAM BEFORE ENTERING YOUR PASSWORD.<br>Team selection will be LOCKED after the first correct password.</div>
     <div id="teamName" class="teamname">Red Gladiator</div>
 
     <label style="display:block;margin-top:18px">Task Password</label>
@@ -91,7 +94,7 @@ button:disabled{opacity:.5}
 
 <script>
 const teamNames={"TEAM 1": "Red Gladiator", "TEAM 2": "PinkStorm", "TEAM 3": "Diamond X", "TEAM 4": "Navy Titan", "TEAM 5": "Obsidian Elite", "TEAM 6": "Onyx"};
-const state={colours:[],used:new Set()};
+const state={colours:[],used:new Set(),teamLocked:false};
 
 function renderSlots(){
   const el=document.getElementById("colors"); el.innerHTML="";
@@ -105,6 +108,16 @@ function renderSlots(){
 function updateHeader(){
   const team=document.getElementById("team").value;
   document.getElementById("teamName").textContent=teamNames[team];
+}
+
+function lockTeam(){
+  state.teamLocked=true;
+  const teamSelect=document.getElementById("team");
+  teamSelect.disabled=true;
+  teamSelect.classList.add("teamLocked");
+  document.querySelector(".teamReminder").innerHTML =
+    "🔒 TEAM LOCKED: <b>" + teamNames[teamSelect.value] +
+    "</b><br>All remaining passwords must be entered for this team.";
 }
 function unlock(){
   const team = document.getElementById("team").value;
@@ -155,6 +168,12 @@ function unlock(){
       msg.classList.add("error");
       msg.textContent = (r && r.message) || "Wrong password.";
       return;
+    }
+
+    // Lock the selected team after the FIRST correct password.
+    // This prevents participants from switching to another team's password set.
+    if(!state.teamLocked){
+      lockTeam();
     }
 
     state.used.add(password);
