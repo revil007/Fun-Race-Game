@@ -224,6 +224,7 @@ button:disabled{opacity:.5;cursor:not-allowed}
     <label>Team</label>
     <select id="team">
       <option value="" selected disabled>▼ PLEASE SELECT YOUR TEAM</option>
+      <option value="TEAM 1">TEAM 1 — Red Gladiator</option>
       <option value="TEAM 2">TEAM 2 — PinkStorm</option>
       <option value="TEAM 3">TEAM 3 — Diamond X</option>
       <option value="TEAM 4">TEAM 4 — Navy Titan</option>
@@ -611,8 +612,12 @@ function finishGame(){
 }
 
 document.getElementById("team").addEventListener("change",function(){
+  const selected=this.value;
   updateHeader();
-  document.getElementById("startBtn").disabled=!this.value;
+  const startBtn=document.getElementById("startBtn");
+  startBtn.disabled = selected === "";
+  startBtn.style.opacity = selected === "" ? "0.35" : "1";
+  startBtn.style.cursor = selected === "" ? "not-allowed" : "pointer";
 });
 document.getElementById("password").addEventListener("keydown",e=>{
   if(e.key==="Enter")unlock();
@@ -626,7 +631,10 @@ document.getElementById("celebrateAgain").addEventListener("click",()=>{
 
 renderSlots();
 updateHeader();
-document.getElementById("startBtn").disabled=true;
+const initialStartBtn=document.getElementById("startBtn");
+initialStartBtn.disabled=true;
+initialStartBtn.style.opacity="0.35";
+initialStartBtn.style.cursor="not-allowed";
 
 function celebrateFinish(){
   const fx=document.getElementById("finishFx");
