@@ -38,6 +38,7 @@ button:disabled{opacity:.5;cursor:not-allowed}
 .reveal{animation:pop .45s ease}
 @keyframes pop{0%{transform:scale(.75);opacity:.2}70%{transform:scale(1.08)}100%{transform:scale(1);opacity:1}}
 .complete{display:none;text-align:center}
+.masterCodeNote{font-size:13px;line-height:1.6;color:#aeb8c8}
 .completeIcon{font-size:54px}
 .complete h2{margin:6px 0 8px}
 .note{font-size:13px;line-height:1.6;color:#aeb8c8}
@@ -57,7 +58,7 @@ button:disabled{opacity:.5;cursor:not-allowed}
     <div class="subtitle">Complete any task • Enter the password • Build your colour sequence</div>
   </div>
 
-  <div class="card">
+  <div id="startCard" class="card">
     <label>Team</label>
     <select id="team">
       <option value="TEAM 1">TEAM 1 — Red Gladiator</option>
@@ -69,11 +70,23 @@ button:disabled{opacity:.5;cursor:not-allowed}
     </select>
 
     <div id="teamReminder" class="teamReminder">
-      ⚠️ IMPORTANT: CHOOSE THE CORRECT TEAM BEFORE ENTERING YOUR FIRST PASSWORD.<br>
-      Team selection will be LOCKED after the first correct password.
+      ⚠️ CHOOSE THE CORRECT TEAM. Team selection will be locked after START GAME.
     </div>
 
     <div id="teamName" class="teamname">Red Gladiator</div>
+
+    <button id="startBtn" onclick="startGame()">▶ START GAME</button>
+    <div id="startMsg" class="status"></div>
+  </div>
+
+  <div id="gameCard" class="card" style="display:none">
+    <div class="progressRow">
+      <div>
+        <div style="font-size:12px;color:#94a3b8;text-transform:uppercase">GAME IN PROGRESS</div>
+        <div id="timer" style="font-size:22px;font-weight:900;margin-top:2px">00:00:00</div>
+      </div>
+      <div class="count">Server timer</div>
+    </div>
 
     <label style="display:block;margin-top:20px">Password</label>
     <input id="password" maxlength="10" autocomplete="off" autocapitalize="characters"
@@ -83,7 +96,7 @@ button:disabled{opacity:.5;cursor:not-allowed}
     <div id="msg" class="status"></div>
   </div>
 
-  <div class="card">
+  <div id="colourCard" class="card" style="display:none">
     <div class="progressRow">
       <div>
         <div style="font-size:12px;color:#94a3b8;text-transform:uppercase">COLOUR SEQUENCE</div>
@@ -96,13 +109,28 @@ button:disabled{opacity:.5;cursor:not-allowed}
     <div id="colors" class="colors"></div>
   </div>
 
+
+  <div id="masterCard" class="card" style="display:none">
+    <div style="text-align:center">
+      <div style="font-size:13px;color:#94a3b8;text-transform:uppercase;letter-spacing:1px">FINAL STAGE</div>
+      <h2 style="margin:8px 0">🧠 MASTER CODE</h2>
+      <div class="note">Use the colour order below from left to right. Go to the Memory Box, memorise each colour's number value, then enter the 6-digit Master Code.</div>
+      <div id="finalColours" class="colors" style="margin-top:18px"></div>
+    </div>
+    <label style="display:block;margin-top:18px">Master Code</label>
+    <input id="masterCode" inputmode="numeric" maxlength="6" autocomplete="off" placeholder="Enter 6-digit Master Code">
+    <button id="finishBtn" onclick="finishGame()">🏁 SUBMIT MASTER CODE</button>
+    <div id="finishMsg" class="status"></div>
+  </div>
+
   <div id="complete" class="card complete">
-    <div class="completeIcon">🏆</div>
-    <h2>ALL 6 COLOURS COLLECTED!</h2>
+    <div class="completeIcon">🎉</div>
+    <h2>CONGRATULATIONS!</h2>
+    <h2 style="font-size:22px">GAME COMPLETED</h2>
     <div class="note">
-      Your final colour sequence is fixed from <b>Position 1 → Position 6</b>.<br><br>
-      Proceed to the <b>MEMORY BOX</b> and convert the colours into their number values
-      in this exact order to create your Master Password.
+      Your Master Code has been accepted by the server.<br><br>
+      <b>Official Finish Time:</b> <span id="finishTimeDisplay">—</span><br>
+      <b>Official Game Time:</b> <span id="durationDisplay">—</span>
     </div>
   </div>
 
@@ -110,30 +138,30 @@ button:disabled{opacity:.5;cursor:not-allowed}
 </div>
 
 <script>
-const teamNames={
-  "TEAM 1":"Red Gladiator",
-  "TEAM 2":"PinkStorm",
-  "TEAM 3":"Diamond X",
-  "TEAM 4":"Navy Titan",
-  "TEAM 5":"Obsidian Elite",
-  "TEAM 6":"Onyx"
-};
+const BACKEND="https://script.google.com/macros/s/AKfycbyXLvgF6QqlovNg9mSvNWlCvGKJJFcLVs7xfALSJ4-eZOqNyogwJ62qwuLhsojwxk8F3A/exec";
 
+const teamNames={"TEAM 1": "Red Gladiator", "TEAM 2": "PinkStorm", "TEAM 3": "Diamond X", "TEAM 4": "Navy Titan", "TEAM 5": "Obsidian Elite", "TEAM 6": "Onyx"};
 const state={
   colours:[null,null,null,null,null,null],
   used:new Set(),
-  teamLocked:false
+  teamLocked:false,
+  started:false,
+  token:null,
+  startMs:null,
+  timer:null
 };
 
 function renderSlots(){
-  const el=document.getElementById("colors");
-  el.innerHTML="";
-  for(let i=0;i<6;i++){
-    const s=document.createElement("div");
-    s.className="slot";
-    s.textContent="—";
-    el.appendChild(s);
-  }
+  const els=[document.getElementById("colors"),document.getElementById("finalColours")].filter(Boolean);
+  els.forEach(el=>{
+    el.innerHTML="";
+    for(let i=0;i<6;i++){
+      const s=document.createElement("div");
+      s.className="slot";
+      s.textContent="—";
+      el.appendChild(s);
+    }
+  });
 }
 
 function updateHeader(){
@@ -146,11 +174,116 @@ function lockTeam(){
   const teamSelect=document.getElementById("team");
   teamSelect.disabled=true;
   teamSelect.classList.add("teamLocked");
-  document.getElementById("teamReminder").innerHTML =
-    "🔒 TEAM LOCKED: <b>"+teamNames[teamSelect.value]+"</b><br>All remaining passwords must be entered for this team.";
+  document.getElementById("teamReminder").innerHTML=
+    "🔒 TEAM LOCKED: <b>"+teamNames[teamSelect.value]+"</b>";
+}
+
+function jsonp(params, callback, onTimeout){
+  const callbackName="funRaceCallback_"+Date.now()+"_"+Math.random().toString(36).slice(2);
+  const script=document.createElement("script");
+  const query=new URLSearchParams({...params,callback:callbackName});
+  let finished=false;
+
+  const cleanup=()=>{
+    if(finished)return;
+    finished=true;
+    if(script.parentNode)script.parentNode.removeChild(script);
+    try{delete window[callbackName]}catch(e){}
+  };
+
+  const timeout=setTimeout(()=>{
+    cleanup();
+    onTimeout();
+  },15000);
+
+  window[callbackName]=(data)=>{
+    clearTimeout(timeout);
+    cleanup();
+    callback(data);
+  };
+
+  script.onerror=()=>{
+    clearTimeout(timeout);
+    cleanup();
+    onTimeout();
+  };
+
+  script.src=BACKEND+"?"+query.toString();
+  document.body.appendChild(script);
+}
+
+function startGame(){
+  const team=document.getElementById("team").value;
+  const btn=document.getElementById("startBtn");
+  const msg=document.getElementById("startMsg");
+
+  btn.disabled=true;
+  btn.textContent="STARTING...";
+  msg.className="status";
+  msg.textContent="";
+
+  jsonp(
+    {action:"start",team:team},
+    r=>{
+      btn.disabled=false;
+      btn.textContent="▶ START GAME";
+
+      if(!r || !r.ok){
+        msg.className="status error";
+        msg.textContent=(r&&r.message)||"Unable to start game.";
+        return;
+      }
+
+      state.started=true;
+      state.token=r.token;
+      state.startMs=Number(r.startMs);
+      lockTeam();
+
+      document.getElementById("gameCard").style.display="block";
+      document.getElementById("colourCard").style.display="block";
+      document.getElementById("startBtn").style.display="none";
+      msg.className="status success";
+      msg.textContent="✓ GAME STARTED — GOOD LUCK!";
+
+      startTimer();
+      window.scrollTo({top:0,behavior:"smooth"});
+    },
+    ()=>{
+      btn.disabled=false;
+      btn.textContent="▶ START GAME";
+      msg.className="status error";
+      msg.textContent="Unable to connect to game server.";
+    }
+  );
+}
+
+function startTimer(){
+  if(state.timer)clearInterval(state.timer);
+  const tick=()=>{
+    if(!state.startMs)return;
+    const elapsed=Math.max(0,Date.now()-state.startMs);
+    document.getElementById("timer").textContent=formatDuration(elapsed);
+  };
+  tick();
+  state.timer=setInterval(tick,250);
+}
+
+function formatDuration(ms){
+  const total=Math.floor(Math.max(0,ms)/1000);
+  const h=Math.floor(total/3600);
+  const m=Math.floor((total%3600)/60);
+  const s=total%60;
+  return [h,m,s].map(v=>String(v).padStart(2,"0")).join(":");
 }
 
 function unlock(){
+  if(!state.started){
+    const msg=document.getElementById("startMsg");
+    msg.className="status error";
+    msg.textContent="Please press START GAME first.";
+    return;
+  }
+
   const team=document.getElementById("team").value;
   const input=document.getElementById("password");
   const password=input.value.trim().toUpperCase();
@@ -161,13 +294,13 @@ function unlock(){
   msg.textContent="";
 
   if(!/^[A-Z0-9]{10}$/.test(password)){
-    msg.classList.add("error");
+    msg.className="status error";
     msg.textContent="Password mesti 10 aksara.";
     return;
   }
 
   if(state.used.has(password)){
-    msg.classList.add("error");
+    msg.className="status error";
     msg.textContent="Password ini sudah digunakan.";
     return;
   }
@@ -175,91 +308,134 @@ function unlock(){
   btn.disabled=true;
   btn.textContent="CHECKING...";
 
-  const callbackName="funRaceCallback_"+Date.now()+"_"+Math.random().toString(36).slice(2);
-  const script=document.createElement("script");
+  jsonp(
+    {action:"check",team:team,password:password},
+    r=>{
+      btn.disabled=false;
+      btn.textContent="🔓 UNLOCK COLOUR";
 
-  const cleanup=()=>{
-    btn.disabled=false;
-    btn.textContent="🔓 UNLOCK COLOUR";
-    if(script.parentNode)script.parentNode.removeChild(script);
-    try{delete window[callbackName]}catch(e){}
-  };
+      if(!r || !r.ok){
+        msg.className="status error";
+        msg.textContent=(r&&r.message)||"Wrong password.";
+        return;
+      }
 
-  const timeout=setTimeout(()=>{
-    cleanup();
-    msg.classList.add("error");
-    msg.textContent="Connection timeout. Please try again.";
-  },12000);
+      if(state.colours[r.task-1]){
+        msg.className="status error";
+        msg.textContent="This task has already been unlocked.";
+        return;
+      }
 
-  window[callbackName]=function(r){
-    clearTimeout(timeout);
-    cleanup();
+      state.used.add(password);
+      state.colours[r.task-1]=r.color;
 
-    if(!r || !r.ok){
-      msg.classList.add("error");
-      msg.textContent=(r&&r.message)||"Wrong password.";
-      return;
+      const slot=document.querySelectorAll("#colors .slot")[r.task-1];
+      slot.className="slot "+r.color+" reveal";
+      slot.textContent=r.color;
+
+      input.value="";
+      msg.className="status success";
+      msg.textContent="✓ PASSWORD ACCEPTED — "+r.color+" UNLOCKED!";
+
+      const completed=state.colours.filter(Boolean).length;
+      document.getElementById("count").textContent=completed+" / 6";
+      document.getElementById("bar").style.width=(completed/6*100)+"%";
+
+      if(completed===6){
+        showMasterStage();
+      }
+    },
+    ()=>{
+      btn.disabled=false;
+      btn.textContent="🔓 UNLOCK COLOUR";
+      msg.className="status error";
+      msg.textContent="Unable to connect to game server.";
     }
+  );
+}
 
-    if(state.colours[r.task-1]){
-      msg.classList.add("error");
-      msg.textContent="This task has already been unlocked.";
-      return;
-    }
-
-    if(!state.teamLocked){
-      lockTeam();
-    }
-
-    state.used.add(password);
-    state.colours[r.task-1]=r.color;
-
-    const slots=document.querySelectorAll(".slot");
-    const slot=slots[r.task-1];
-
-    slot.className="slot "+r.color+" reveal";
-    slot.textContent=r.color;
-
-    input.value="";
-    msg.classList.add("success");
-    msg.textContent="✓ TASK "+r.task+" PASSWORD ACCEPTED — "+r.color+" UNLOCKED!";
-
-    const completed=state.colours.filter(Boolean).length;
-    document.getElementById("count").textContent=completed+" / 6";
-    document.getElementById("bar").style.width=(completed/6*100)+"%";
-
-    if(completed===6){
-      document.getElementById("complete").style.display="block";
-      setTimeout(()=>{
-        document.getElementById("complete").scrollIntoView({behavior:"smooth"});
-      },250);
-    }
-  };
-
-  const params=new URLSearchParams({
-    action:"check",
-    team:team,
-    password:password,
-    callback:callbackName
+function showMasterStage(){
+  document.getElementById("masterCard").style.display="block";
+  const final=document.getElementById("finalColours");
+  final.innerHTML="";
+  state.colours.forEach(c=>{
+    const s=document.createElement("div");
+    s.className="slot "+c+" reveal";
+    s.textContent=c;
+    final.appendChild(s);
   });
+  document.getElementById("masterCard").scrollIntoView({behavior:"smooth"});
+}
 
-  script.src=
-    "https://script.google.com/macros/s/AKfycbyXLvgF6QqlovNg9mSvNWlCvGKJJFcLVs7xfALSJ4-eZOqNyogwJ62qwuLhsojwxk8F3A/exec?"+
-    params.toString();
+function finishGame(){
+  const code=document.getElementById("masterCode").value.trim();
+  const btn=document.getElementById("finishBtn");
+  const msg=document.getElementById("finishMsg");
 
-  script.onerror=function(){
-    clearTimeout(timeout);
-    cleanup();
-    msg.classList.add("error");
-    msg.textContent="Unable to connect to game server.";
-  };
+  msg.className="status";
+  msg.textContent="";
 
-  document.body.appendChild(script);
+  if(!/^\d{6}$/.test(code)){
+    msg.className="status error";
+    msg.textContent="Master Code mesti 6 digit.";
+    return;
+  }
+
+  if(!state.token){
+    msg.className="status error";
+    msg.textContent="Invalid game session.";
+    return;
+  }
+
+  btn.disabled=true;
+  btn.textContent="CHECKING MASTER CODE...";
+
+  jsonp(
+    {
+      action:"finish",
+      team:document.getElementById("team").value,
+      token:state.token,
+      masterCode:code
+    },
+    r=>{
+      btn.disabled=false;
+      btn.textContent="🏁 SUBMIT MASTER CODE";
+
+      if(!r || !r.ok){
+        msg.className="status error";
+        msg.textContent=(r&&r.message)||"Incorrect Master Code.";
+        return;
+      }
+
+      if(state.timer)clearInterval(state.timer);
+      state.started=false;
+
+      document.getElementById("masterCard").style.display="none";
+      document.getElementById("gameCard").style.display="none";
+      document.getElementById("complete").style.display="block";
+
+      const finishDate=new Date(r.finishTime);
+      document.getElementById("finishTimeDisplay").textContent=
+        finishDate.toLocaleTimeString([],{hour:"2-digit",minute:"2-digit",second:"2-digit"});
+      document.getElementById("durationDisplay").textContent=r.duration;
+
+      document.getElementById("complete").scrollIntoView({behavior:"smooth"});
+    },
+    ()=>{
+      btn.disabled=false;
+      btn.textContent="🏁 SUBMIT MASTER CODE";
+      msg.className="status error";
+      msg.textContent="Unable to connect to game server.";
+    }
+  );
 }
 
 document.getElementById("team").addEventListener("change",updateHeader);
 document.getElementById("password").addEventListener("keydown",e=>{
   if(e.key==="Enter")unlock();
+});
+document.getElementById("masterCode").addEventListener("keydown",e=>{
+  if(e.key==="Enter")finishGame();
 });
 
 renderSlots();
