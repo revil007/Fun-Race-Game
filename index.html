@@ -223,7 +223,7 @@ button:disabled{opacity:.5;cursor:not-allowed}
   <div id="startCard" class="card">
     <label>Team</label>
     <select id="team">
-      <option value="TEAM 1">TEAM 1 — Red Gladiator</option>
+      <option value="" selected disabled>▼ PLEASE SELECT YOUR TEAM</option>
       <option value="TEAM 2">TEAM 2 — PinkStorm</option>
       <option value="TEAM 3">TEAM 3 — Diamond X</option>
       <option value="TEAM 4">TEAM 4 — Navy Titan</option>
@@ -235,9 +235,9 @@ button:disabled{opacity:.5;cursor:not-allowed}
       ⚠️ CHOOSE THE CORRECT TEAM. Team selection will be locked after START GAME.
     </div>
 
-    <div id="teamName" class="teamname">Red Gladiator</div>
+    <div id="teamName" class="teamname">Please select your team</div>
 
-    <button id="startBtn" onclick="startGame()">▶ START GAME</button>
+    <button id="startBtn" onclick="startGame()" disabled>▶ START GAME</button>
     <div id="startMsg" class="status"></div>
   </div>
 
@@ -328,7 +328,7 @@ function renderSlots(){
 
 function updateHeader(){
   const team=document.getElementById("team").value;
-  document.getElementById("teamName").textContent=teamNames[team];
+  document.getElementById("teamName").textContent=team ? teamNames[team] : "Please select your team";
 }
 
 function lockTeam(){
@@ -376,6 +376,12 @@ function jsonp(params, callback, onTimeout){
 
 function startGame(){
   const team=document.getElementById("team").value;
+  if(!team){
+    const msg=document.getElementById("startMsg");
+    msg.className="status error";
+    msg.textContent="Please select your team first.";
+    return;
+  }
   const btn=document.getElementById("startBtn");
   const msg=document.getElementById("startMsg");
 
@@ -604,7 +610,10 @@ function finishGame(){
   );
 }
 
-document.getElementById("team").addEventListener("change",updateHeader);
+document.getElementById("team").addEventListener("change",function(){
+  updateHeader();
+  document.getElementById("startBtn").disabled=!this.value;
+});
 document.getElementById("password").addEventListener("keydown",e=>{
   if(e.key==="Enter")unlock();
 });
@@ -617,6 +626,7 @@ document.getElementById("celebrateAgain").addEventListener("click",()=>{
 
 renderSlots();
 updateHeader();
+document.getElementById("startBtn").disabled=true;
 
 function celebrateFinish(){
   const fx=document.getElementById("finishFx");
