@@ -8,18 +8,52 @@
 <style>
 :root{--bg:#080b12;--card:#111722;--line:#263043;--muted:#8d99ad;--white:#f8fafc}
 *{box-sizing:border-box}
-body{margin:0;background:radial-gradient(circle at top,#182235 0,#080b12 52%);color:var(--white);font-family:Arial,Helvetica,sans-serif;min-height:100vh;padding:16px}
+body{
+  margin:0;
+  color:var(--white);
+  font-family:Arial,Helvetica,sans-serif;
+  min-height:100vh;
+  padding:16px;
+  background:
+    radial-gradient(circle at 12% 18%, rgba(59,130,246,.28) 0, transparent 22%),
+    radial-gradient(circle at 88% 16%, rgba(239,68,68,.24) 0, transparent 22%),
+    radial-gradient(circle at 78% 82%, rgba(168,85,247,.22) 0, transparent 24%),
+    linear-gradient(135deg,#07111f 0%,#101827 45%,#090d18 100%);
+  position:relative;
+  overflow-x:hidden;
+}
+body:before{
+  content:"";
+  position:fixed;
+  inset:0;
+  pointer-events:none;
+  opacity:.18;
+  background:
+    repeating-linear-gradient(135deg,transparent 0 28px,rgba(255,255,255,.08) 29px 31px,transparent 32px 62px);
+}
+body:after{
+  content:"";
+  position:fixed;
+  left:-10%;
+  right:-10%;
+  bottom:8%;
+  height:110px;
+  pointer-events:none;
+  transform:rotate(-4deg);
+  background:linear-gradient(90deg,transparent,rgba(250,204,21,.12),rgba(59,130,246,.13),rgba(239,68,68,.12),transparent);
+  filter:blur(8px);
+}
 .app{max-width:560px;margin:auto}
-.header{text-align:center;padding:18px 10px 12px}
-.badge{display:inline-block;border:1px solid #334155;border-radius:999px;padding:7px 12px;font-size:11px;letter-spacing:1.5px;color:#cbd5e1}
-h1{font-size:34px;letter-spacing:2px;margin:13px 0 5px}
-.subtitle{color:var(--muted);font-size:14px}
-.card{background:rgba(17,23,34,.96);border:1px solid var(--line);border-radius:24px;padding:20px;margin-top:14px;box-shadow:0 15px 45px rgba(0,0,0,.28)}
+.header{text-align:center;padding:18px 10px 12px;position:relative}
+.badge{display:inline-block;border:1px solid rgba(250,204,21,.55);background:rgba(250,204,21,.08);border-radius:999px;padding:7px 14px;font-size:11px;letter-spacing:1.8px;color:#fde68a;font-weight:900}
+h1{font-size:36px;letter-spacing:2.5px;margin:13px 0 5px;text-shadow:0 4px 20px rgba(59,130,246,.35)}
+.subtitle{color:#b8c4d6;font-size:14px;font-weight:700}
+.card{background:rgba(11,17,29,.90);border:1px solid rgba(71,85,105,.65);border-radius:24px;padding:20px;margin-top:14px;box-shadow:0 18px 50px rgba(0,0,0,.35);backdrop-filter:blur(8px)}
 label{font-size:12px;color:#aeb8c8;letter-spacing:.8px;text-transform:uppercase}
 select,input,button{width:100%;min-height:52px;border-radius:15px;margin-top:8px;font-size:16px}
 select,input{background:#0b1019;color:white;border:1px solid #334155;padding:0 15px;outline:none}
-button{border:0;background:#f8fafc;color:#080b12;font-weight:900;letter-spacing:.7px;cursor:pointer}
-button:disabled{opacity:.5;cursor:not-allowed}
+button{border:0;background:linear-gradient(135deg,#f8fafc,#dbeafe);color:#080b12;font-weight:900;letter-spacing:.7px;cursor:pointer;box-shadow:0 8px 22px rgba(59,130,246,.18)}
+button:disabled{opacity:.35;cursor:not-allowed;filter:grayscale(1)}
 .status{text-align:center;min-height:23px;margin-top:10px;font-weight:800}
 .success{color:#86efac}.error{color:#fca5a5}
 .teamname{font-size:21px;font-weight:900;margin:8px 0 0}
@@ -28,7 +62,7 @@ button:disabled{opacity:.5;cursor:not-allowed}
 .progressRow{display:flex;justify-content:space-between;align-items:end}
 .count{font-size:13px;color:#94a3b8}
 .progress{height:8px;background:#202938;border-radius:99px;overflow:hidden;margin-top:12px}
-.bar{height:100%;width:0%;background:linear-gradient(90deg,#38bdf8,#a78bfa);transition:.45s}
+.bar{height:100%;width:0%;background:linear-gradient(90deg,#22c55e,#facc15,#f97316,#ef4444,#a855f7,#3b82f6);transition:.45s}
 .colors{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:6px;margin-top:14px;width:100%;}
 .slot{height:62px;min-width:0;width:100%;border-radius:12px;background:#0b1019;border:1px dashed #344054;display:flex;align-items:center;justify-content:center;text-align:center;color:#58657a;font-weight:900;font-size:12px;transition:.4s;line-height:1.3}
 .slot small{display:none}
@@ -37,68 +71,7 @@ button:disabled{opacity:.5;cursor:not-allowed}
 .slot.PURPLE{background:#a855f7;color:white;border:0}.slot.ORANGE{background:#f97316;color:white;border:0}
 .reveal{animation:pop .45s ease}
 @keyframes pop{0%{transform:scale(.75);opacity:.2}70%{transform:scale(1.08)}100%{transform:scale(1);opacity:1}}
-.complete{
-  display:none;text-align:center;position:relative;overflow:hidden;
-  padding:28px 20px 24px;
-  background:
-    radial-gradient(circle at 50% -10%,rgba(250,204,21,.12),transparent 35%),
-    rgba(10,16,28,.94);
-}
-.finishBadge{
-  display:inline-block;padding:8px 14px;border-radius:999px;
-  border:1px solid rgba(250,204,21,.55);
-  background:rgba(250,204,21,.08);color:#fde68a;
-  font-size:11px;font-weight:900;letter-spacing:1.8px;
-}
-.finishTitle{
-  font-size:40px;line-height:1.05;margin:14px 0 4px;
-  letter-spacing:-.5px;
-  text-shadow:0 0 30px rgba(250,204,21,.38);
-  animation:finishPulse 1.3s ease-in-out infinite alternate;
-}
-.finishSub{
-  font-size:25px;font-weight:900;margin:0 0 15px;
-  letter-spacing:.5px;
-}
-.finishMessage{
-  color:#cbd5e1;font-size:13px;line-height:1.55;
-  max-width:390px;margin:0 auto 16px;
-}
-.finishColours{
-  display:flex;justify-content:center;gap:7px;margin:17px 0 19px;
-}
-.finishColour{
-  width:43px;height:43px;border-radius:11px;
-  box-shadow:0 0 18px rgba(255,255,255,.13);
-  display:flex;align-items:center;justify-content:center;
-  font-size:0;
-}
-.finishTimeGrid{
-  display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:6px;
-}
-.finishTimeBox{
-  padding:14px 9px;border-radius:17px;
-  background:#0b1220;border:1px solid #26364e;
-}
-.finishTimeBox span{
-  display:block;color:#94a3b8;font-size:9px;
-  text-transform:uppercase;letter-spacing:1px;margin-bottom:5px;
-}
-.finishTimeBox b{font-size:20px}
-.finishDone{
-  margin-top:16px;padding:11px 12px;border-radius:14px;
-  background:rgba(34,197,94,.08);
-  border:1px solid rgba(34,197,94,.28);
-  color:#bbf7d0;font-size:12px;font-weight:800;
-}
-@keyframes finishPulse{from{transform:scale(1)}to{transform:scale(1.035)}}
-.finishFx{position:fixed;inset:0;pointer-events:none;overflow:hidden;z-index:10001}
-.confettiPiece{position:absolute;top:-25px;width:8px;height:15px;border-radius:2px;animation:confettiFall linear forwards}
-@keyframes confettiFall{to{transform:translate3d(var(--dx),110vh,0) rotate(1100deg);opacity:.95}}
-.fireworkDot{position:absolute;width:6px;height:6px;border-radius:50%;background:currentColor;animation:fireworkBurst 1.1s ease-out forwards;box-shadow:0 0 12px 4px currentColor}
-@keyframes fireworkBurst{0%{transform:translate(0,0) scale(1);opacity:1}100%{transform:translate(var(--fx),var(--fy)) scale(.05);opacity:0}}
-.finishBtn{margin-top:18px}
-
+.complete{display:none;text-align:center}
 .masterCodeNote{font-size:13px;line-height:1.6;color:#aeb8c8}
 .completeIcon{font-size:54px}
 .complete h2{margin:6px 0 8px}
@@ -109,110 +82,9 @@ button:disabled{opacity:.5;cursor:not-allowed}
   .colors{gap:5px}
   .slot{height:58px;border-radius:11px;font-size:10px}
 }
-
-/* Floating final celebration overlay */
-.finishOverlay{
-  position:fixed;inset:0;z-index:10000;
-  display:none;align-items:center;justify-content:center;
-  padding:18px;
-  background:rgba(2,6,23,.72);
-  backdrop-filter:blur(6px);
-  animation:overlayIn .35s ease forwards;
-}
-.finishOverlay.show{display:flex}
-.finishOverlay .finishModal{
-  width:min(520px,100%);
-  max-height:92vh;overflow:auto;
-  text-align:center;padding:30px 22px 24px;
-  border:1px solid rgba(148,163,184,.38);
-  border-radius:28px;
-  background:
-    radial-gradient(circle at 50% -10%,rgba(250,204,21,.14),transparent 36%),
-    rgba(10,16,28,.96);
-  box-shadow:0 30px 100px rgba(0,0,0,.58),0 0 70px rgba(250,204,21,.08);
-  transform:translateY(18px) scale(.94);
-  animation:modalIn .55s cubic-bezier(.2,.85,.25,1) .08s forwards;position:relative;z-index:10002;
-}
-@keyframes overlayIn{from{opacity:0}to{opacity:1}}
-@keyframes modalIn{to{transform:translateY(0) scale(1)}}
-.finishOverlay .finishBadge{
-  display:inline-block;padding:8px 14px;border-radius:999px;
-  border:1px solid rgba(250,204,21,.55);
-  background:rgba(250,204,21,.08);color:#fde68a;
-  font-size:11px;font-weight:900;letter-spacing:1.8px;
-}
-.finishOverlay .finishTitle{
-  font-size:40px;line-height:1.05;margin:14px 0 4px;
-  letter-spacing:-.5px;
-  text-shadow:0 0 30px rgba(250,204,21,.4);
-  animation:finishPulse 1.3s ease-in-out infinite alternate;
-}
-.finishOverlay .finishSub{font-size:25px;font-weight:900;margin:0 0 10px}
-.finishOverlay .finishMessage{color:#cbd5e1;font-size:13px;line-height:1.55;margin:0 auto 15px}
-.finishOverlay .finishColours{display:flex;justify-content:center;gap:7px;margin:17px 0 19px}
-.finishOverlay .finishColour{
-  width:43px;height:43px;border-radius:11px;
-  box-shadow:0 0 18px rgba(255,255,255,.13);
-}
-.finishOverlay .finishTimeGrid{display:grid;grid-template-columns:1fr 1fr;gap:9px}
-.finishOverlay .finishTimeBox{
-  padding:14px 9px;border-radius:17px;
-  background:#0b1220;border:1px solid #26364e;
-}
-.finishOverlay .finishTimeBox span{
-  display:block;color:#94a3b8;font-size:9px;text-transform:uppercase;
-  letter-spacing:1px;margin-bottom:5px;
-}
-.finishOverlay .finishTimeBox b{font-size:20px}
-.finishOverlay .finishDone{
-  margin-top:16px;padding:11px 12px;border-radius:14px;
-  background:rgba(34,197,94,.08);
-  border:1px solid rgba(34,197,94,.28);
-  color:#bbf7d0;font-size:12px;font-weight:800;
-}
-.finishOverlay .celebrateAgain{
-  margin-top:12px;width:100%;height:48px;border-radius:14px;
-}
-@media(max-width:500px){
-  .finishOverlay{padding:12px}
-  .finishOverlay .finishModal{padding:25px 16px 20px;border-radius:24px}
-  .finishOverlay .finishTitle{font-size:34px}
-  .finishOverlay .finishSub{font-size:22px}
-  .finishOverlay .finishColour{width:39px;height:39px;border-radius:10px}
-  .finishOverlay .finishTimeBox{padding:12px 6px}
-  .finishOverlay .finishTimeBox b{font-size:17px}
-}
-
 </style>
 </head>
 <body>
-
-<div id="finishOverlay" class="finishOverlay" aria-hidden="true">
-  <div class="finishModal">
-    <div class="finishBadge">🏁 FUN RACE 2026 • FINISH</div>
-    <div class="finishTitle">🎉 CONGRATULATIONS!</div>
-    <div class="finishSub">GAME COMPLETED</div>
-    <div class="finishMessage">
-      🏆 Your Master Code has been accepted.<br>
-      You have successfully completed the challenge!
-    </div>
-    <div id="overlayFinishColours" class="finishColours"></div>
-    <div class="finishTimeGrid">
-      <div class="finishTimeBox">
-        <span>Official Finish Time</span>
-        <b id="overlayFinishTime">—</b>
-      </div>
-      <div class="finishTimeBox">
-        <span>Official Game Time</span>
-        <b id="overlayDuration">—</b>
-      </div>
-    </div>
-    <div class="finishDone">✅ FINAL CODE VERIFIED • GAME COMPLETE</div>
-    <button class="celebrateAgain" id="celebrateAgain">🎆 CELEBRATE AGAIN</button>
-  </div>
-</div>
-
-<div id="finishFx" class="finishFx"></div>
 <div class="app">
   <div class="header">
     <span class="badge">COMPANY FUN RACE 2026</span>
@@ -236,7 +108,7 @@ button:disabled{opacity:.5;cursor:not-allowed}
       ⚠️ CHOOSE THE CORRECT TEAM. Team selection will be locked after START GAME.
     </div>
 
-    <div id="teamName" class="teamname">Please select your team</div>
+    <div id="teamName" class="teamname">Red Gladiator</div>
 
     <button id="startBtn" onclick="startGame()" disabled>▶ START GAME</button>
     <div id="startMsg" class="status"></div>
@@ -297,7 +169,7 @@ button:disabled{opacity:.5;cursor:not-allowed}
     </div>
   </div>
 
-  <div class="footer">FUN RACE 2026 • GitHub Game Portal • Secure Password Backend</div>
+  <div class="footer">🏁 FUN RACE 2026 • GAME PORTAL</div>
 </div>
 
 <script>
@@ -581,26 +453,14 @@ function finishGame(){
 
       document.getElementById("masterCard").style.display="none";
       document.getElementById("gameCard").style.display="none";
-      document.getElementById("complete").style.display="none";
+      document.getElementById("complete").style.display="block";
 
       const finishDate=new Date(r.finishTime);
-      const finishTimeText=finishDate.toLocaleTimeString([],{{hour:"2-digit",minute:"2-digit",second:"2-digit"}});
+      document.getElementById("finishTimeDisplay").textContent=
+        finishDate.toLocaleTimeString([],{hour:"2-digit",minute:"2-digit",second:"2-digit"});
+      document.getElementById("durationDisplay").textContent=r.duration;
 
-      const overlay=document.getElementById("finishOverlay");
-      const overlayColours=document.getElementById("overlayFinishColours");
-      overlayColours.innerHTML="";
-      state.colours.forEach(c=>{{
-        const s=document.createElement("div");
-        s.className="finishColour "+c;
-        s.title=c;
-        overlayColours.appendChild(s);
-      }});
-      document.getElementById("overlayFinishTime").textContent=finishTimeText;
-      document.getElementById("overlayDuration").textContent=r.duration;
-      overlay.classList.add("show");
-      overlay.setAttribute("aria-hidden","false");
-      document.body.style.overflow="hidden";
-      setTimeout(celebrateFinish,180);
+      document.getElementById("complete").scrollIntoView({behavior:"smooth"});
     },
     ()=>{
       btn.disabled=false;
@@ -612,12 +472,8 @@ function finishGame(){
 }
 
 document.getElementById("team").addEventListener("change",function(){
-  const selected=this.value;
   updateHeader();
-  const startBtn=document.getElementById("startBtn");
-  startBtn.disabled = selected === "";
-  startBtn.style.opacity = selected === "" ? "0.35" : "1";
-  startBtn.style.cursor = selected === "" ? "not-allowed" : "pointer";
+  document.getElementById("startBtn").disabled=!this.value;
 });
 document.getElementById("password").addEventListener("keydown",e=>{
   if(e.key==="Enter")unlock();
@@ -625,65 +481,9 @@ document.getElementById("password").addEventListener("keydown",e=>{
 document.getElementById("masterCode").addEventListener("keydown",e=>{
   if(e.key==="Enter")finishGame();
 });
-document.getElementById("celebrateAgain").addEventListener("click",()=>{
-  celebrateFinish();
-});
 
 renderSlots();
 updateHeader();
-const initialStartBtn=document.getElementById("startBtn");
-initialStartBtn.disabled=true;
-initialStartBtn.style.opacity="0.35";
-initialStartBtn.style.cursor="not-allowed";
-
-function celebrateFinish(){
-  const fx=document.getElementById("finishFx");
-  fx.innerHTML="";
-  const colours=["#3b82f6","#facc15","#f97316","#ef4444","#22c55e","#a855f7","#ffffff"];
-
-  // Confetti
-  for(let i=0;i<100;i++){
-    const e=document.createElement("div");
-    e.className="confettiPiece";
-    e.style.left=(Math.random()*100)+"vw";
-    e.style.background=colours[Math.floor(Math.random()*colours.length)];
-    e.style.setProperty("--dx",(Math.random()*260-130)+"px");
-    e.style.animationDuration=(2.2+Math.random()*2.5)+"s";
-    e.style.animationDelay=(Math.random()*0.7)+"s";
-    fx.appendChild(e);
-    setTimeout(()=>e.remove(),6000);
-  }
-
-  // Fireworks behind/in front of the floating modal.
-  const points=[
-    [18,25],[82,24],[50,16],[28,45],[72,44],[50,31]
-  ];
-
-  points.forEach((p,i)=>{
-    setTimeout(()=>{
-      const x=innerWidth*p[0]/100;
-      const y=innerHeight*p[1]/100;
-      const colour=colours[i%colours.length];
-
-      for(let j=0;j<32;j++){
-        const e=document.createElement("div");
-        e.className="fireworkDot";
-        e.style.left=x+"px";
-        e.style.top=y+"px";
-        e.style.color=colour;
-        const a=Math.random()*Math.PI*2;
-        const d=55+Math.random()*125;
-        e.style.setProperty("--fx",Math.cos(a)*d+"px");
-        e.style.setProperty("--fy",Math.sin(a)*d+"px");
-        fx.appendChild(e);
-        setTimeout(()=>e.remove(),1500);
-      }
-    },i*240);
-  });
-
-  setTimeout(()=>{fx.innerHTML="";},6500);
-}
-
 </script>
 </body>
 </html>
