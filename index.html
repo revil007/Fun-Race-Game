@@ -86,7 +86,7 @@ button:disabled{opacity:.5}
     </div>
   </div>
 
-  <div class="footer">FUN RACE 2026 • Game Control System</div>
+  <div class="footer">FUN RACE 2026 • GitHub Game Portal • Secure Password Backend</div>
 </div>
 
 <script>
@@ -107,41 +107,103 @@ function updateHeader(){
   document.getElementById("teamName").textContent=teamNames[team];
 }
 function unlock(){
-  const team=document.getElementById("team").value;
-  const input=document.getElementById("password");
-  const password=input.value.trim().toUpperCase();
-  const btn=document.getElementById("unlockBtn");
-  const msg=document.getElementById("msg");
-  msg.className="status"; msg.textContent="";
+  const team = document.getElementById("team").value;
+  const input = document.getElementById("password");
+  const password = input.value.trim().toUpperCase();
+  const btn = document.getElementById("unlockBtn");
+  const msg = document.getElementById("msg");
+
+  msg.className = "status";
+  msg.textContent = "";
+
   if(!/^[A-Z0-9]{10}$/.test(password)){
-    msg.classList.add("error"); msg.textContent="Password mesti 10 aksara."; return;
+    msg.classList.add("error");
+    msg.textContent = "Password mesti 10 aksara.";
+    return;
   }
+
   if(state.used.has(password)){
-    msg.classList.add("error"); msg.textContent="Password ini sudah digunakan."; return;
+    msg.classList.add("error");
+    msg.textContent = "Password ini sudah digunakan.";
+    return;
   }
-  btn.disabled=true; btn.textContent="CHECKING...";
-  google.script.run.withSuccessHandler(function(r){
-    btn.disabled=false; btn.textContent="🔓 UNLOCK COLOUR";
+
+  btn.disabled = true;
+  btn.textContent = "CHECKING...";
+
+  const callbackName = "funRaceCallback_" + Date.now();
+  const script = document.createElement("script");
+
+  const cleanup = () => {
+    btn.disabled = false;
+    btn.textContent = "🔓 UNLOCK COLOUR";
+    if(script.parentNode) script.parentNode.removeChild(script);
+    try { delete window[callbackName]; } catch(e) {}
+  };
+
+  const timeout = setTimeout(() => {
+    cleanup();
+    msg.classList.add("error");
+    msg.textContent = "Connection timeout. Please try again.";
+  }, 12000);
+
+  window[callbackName] = function(r){
+    clearTimeout(timeout);
+    cleanup();
+
     if(!r || !r.ok){
-      msg.classList.add("error"); msg.textContent=(r&&r.message)||"Wrong password."; return;
+      msg.classList.add("error");
+      msg.textContent = (r && r.message) || "Wrong password.";
+      return;
     }
-    state.used.add(password); state.colours.push(r.color);
-    const slots=document.querySelectorAll(".slot");
-    const slot=slots[state.colours.length-1];
-    slot.className="slot "+r.color+" reveal";
-    slot.textContent=r.color;
-    input.value="";
-    msg.classList.add("success"); msg.textContent="✓ CORRECT — COLOUR UNLOCKED!";
-    document.getElementById("count").textContent=state.colours.length+" / 6";
-    document.getElementById("bar").style.width=(state.colours.length/6*100)+"%";
-    if(state.colours.length===6){
-      document.getElementById("complete").style.display="block";
-      setTimeout(()=>document.getElementById("complete").scrollIntoView({behavior:"smooth"}),250);
+
+    state.used.add(password);
+    state.colours.push(r.color);
+
+    const slots = document.querySelectorAll(".slot");
+    const slot = slots[state.colours.length - 1];
+
+    slot.className = "slot " + r.color + " reveal";
+    slot.textContent = r.color;
+
+    input.value = "";
+    msg.classList.add("success");
+    msg.textContent = "✓ CORRECT — COLOUR UNLOCKED!";
+
+    document.getElementById("count").textContent =
+      state.colours.length + " / 6";
+
+    document.getElementById("bar").style.width =
+      (state.colours.length / 6 * 100) + "%";
+
+    if(state.colours.length === 6){
+      document.getElementById("complete").style.display = "block";
+      setTimeout(() => {
+        document.getElementById("complete")
+          .scrollIntoView({behavior:"smooth"});
+      }, 250);
     }
-  }).withFailureHandler(function(){
-    btn.disabled=false; btn.textContent="🔓 UNLOCK COLOUR";
-    msg.classList.add("error"); msg.textContent="Connection error. Try again.";
-  }).checkPassword(team,password);
+  };
+
+  const params = new URLSearchParams({
+    action: "check",
+    team: team,
+    password: password,
+    callback: callbackName
+  });
+
+  script.src =
+    "https://script.google.com/macros/s/AKfycbyXLvgF6QqlovNg9mSvNWlCvGKJJFcLVs7xfALSJ4-eZOqNyogwJ62qwuLhsojwxk8F3A/exec?" +
+    params.toString();
+
+  script.onerror = function(){
+    clearTimeout(timeout);
+    cleanup();
+    msg.classList.add("error");
+    msg.textContent = "Unable to connect to game server.";
+  };
+
+  document.body.appendChild(script);
 }
 document.getElementById("team").addEventListener("change",updateHeader);
 document.getElementById("password").addEventListener("keydown",e=>{if(e.key==="Enter")unlock()});
