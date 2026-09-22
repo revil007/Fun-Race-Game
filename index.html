@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <meta name="theme-color" content="#080b12">
-<title>FUN RACE 2026 — Colour Quest</title>
+<title>SCI FUN RACE PART 2 2027 — Colour Quest</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@600;700;800&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -20,6 +20,7 @@ body{
   margin:0;
   color:var(--white);
   font-family:var(--font-body);
+  text-align:center;
   -webkit-font-smoothing:antialiased;
   text-rendering:optimizeLegibility;
   min-height:100vh;
@@ -90,12 +91,14 @@ h1{
   backdrop-filter:blur(8px);position:relative;
 }
 label{
+  display:block;
   font-family:var(--font-body);
   font-size:11.5px;color:#aeb8c8;letter-spacing:.9px;
   text-transform:uppercase;font-weight:700;
+  text-align:center;
 }
 select,input,button{width:100%;min-height:52px;border-radius:15px;margin-top:8px;font-size:16px;font-family:var(--font-body)}
-select,input{background:#0b1019;color:white;border:1px solid #334155;padding:0 15px;outline:none;font-weight:600}
+select,input{background:#0b1019;color:white;border:1px solid #334155;padding:0 15px;outline:none;font-weight:600;text-align:center}
 select:focus,input:focus{border-color:#facc15}
 input::placeholder{color:#5c6780;font-weight:500}
 button{
@@ -119,8 +122,8 @@ button:disabled{opacity:.35;cursor:not-allowed;filter:grayscale(1)}
   --accent:#38bdf8;
   width:100%;min-height:64px;border-radius:14px;margin:0;
   background:#0b1019;border:1.5px solid #263043;
-  color:#e2e8f0;cursor:pointer;text-align:left;padding:10px 12px;
-  display:flex;flex-direction:column;justify-content:center;gap:2px;
+  color:#e2e8f0;cursor:pointer;text-align:center;padding:10px 12px;
+  display:flex;flex-direction:column;justify-content:center;align-items:center;gap:2px;
   transition:border-color .18s ease,background .18s ease,transform .12s ease,box-shadow .18s ease;
   font-family:var(--font-body);
 }
@@ -339,7 +342,7 @@ button:disabled{opacity:.35;cursor:not-allowed;filter:grayscale(1)}
 
 <div id="finishOverlay" class="finishOverlay" aria-hidden="true">
   <div class="finishModal">
-    <div class="finishBadge">🏁 FUN RACE 2026 • FINISH</div>
+    <div class="finishBadge">🏁 SCI FUN RACE PART 2 2027 • FINISH</div>
     <div class="finishTitle">🎉 CONGRATULATIONS!</div>
     <div class="finishSub">GAME COMPLETED</div>
     <div class="finishMessage">
@@ -365,7 +368,7 @@ button:disabled{opacity:.35;cursor:not-allowed;filter:grayscale(1)}
 <div id="finishFx" class="finishFx"></div>
 <div class="app">
   <div class="header">
-    <span class="badge">🏁 COMPANY FUN RACE 2026</span>
+    <span class="badge">🏁 SCI FUN RACE PART 2 2027</span>
     <h1>COLOUR QUEST</h1>
     <div class="subtitle">🎯 Complete any task &nbsp;•&nbsp; 🔑 Enter the password &nbsp;•&nbsp; 🎨 Build your colour sequence</div>
   </div>
@@ -400,7 +403,7 @@ button:disabled{opacity:.35;cursor:not-allowed;filter:grayscale(1)}
     </div>
 
     <div id="teamReminder" class="teamReminder">
-      ⚠️ CHOOSE THE CORRECT TEAM. Team selection will be locked after START GAME.
+      ⚠️ CHOOSE THE CORRECT TEAM. TEAM SELECTION WILL BE LOCKED AFTER START GAME.
     </div>
 
     <div id="teamName" class="teamname">Please select your team</div>
@@ -473,7 +476,7 @@ button:disabled{opacity:.35;cursor:not-allowed;filter:grayscale(1)}
     </div>
   </div>
 
-  <div class="footer">🏎️ FUN RACE 2026 &nbsp;•&nbsp; GAME PORTAL</div>
+  <div class="footer">🏎️ FUN RACE PART 2 2027 &nbsp;•&nbsp; GAME PORTAL</div>
 </div>
 
 <script>
