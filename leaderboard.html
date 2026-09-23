@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="theme-color" content="#080b12">
-<title>FUN RACE 2026 — Live Leaderboard</title>
+<title>SCI FUN RACE PART 2 2027 — Live Leaderboard</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@600;700;800&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -83,6 +83,40 @@ h1{
   border:1px dashed #2a2a38;border-radius:16px;
 }
 
+.leaderBanner{
+  display:flex;align-items:center;gap:clamp(12px,2.5vw,20px);flex-wrap:wrap;
+  background:linear-gradient(135deg,rgba(250,204,21,.14),rgba(59,130,246,.08));
+  border:1.5px solid rgba(250,204,21,.55);border-radius:20px;
+  padding:clamp(14px,2.6vw,20px) clamp(16px,3vw,24px);
+  margin-bottom:clamp(18px,3vw,26px);
+  box-shadow:0 12px 34px rgba(250,204,21,.1);
+}
+.leaderIcon{font-size:clamp(30px,5vw,42px);line-height:1;animation:leaderPulse 1.4s ease-in-out infinite}
+@keyframes leaderPulse{0%,100%{transform:scale(1)}50%{transform:scale(1.08)}}
+.leaderLabel{
+  font-family:var(--font-display);font-size:clamp(10.5px,1.3vw,12px);
+  letter-spacing:1.8px;color:#fde68a;font-weight:800;text-transform:uppercase;
+}
+.leaderName{
+  font-family:var(--font-display);font-size:clamp(20px,3.4vw,28px);
+  font-weight:800;letter-spacing:.3px;margin-top:2px;
+}
+.leaderSub{color:#c7cfdd;font-size:clamp(12px,1.5vw,13.5px);font-weight:600;margin-top:2px}
+.leaderProgress{margin-left:auto;text-align:right}
+.leaderProgress b{
+  font-family:var(--font-display);font-size:clamp(22px,3.6vw,32px);
+  color:#fde68a;font-variant-numeric:tabular-nums;
+}
+.leaderProgress span{display:block;font-size:11px;color:#94a3b8;text-transform:uppercase;letter-spacing:1px;margin-top:2px}
+
+.progressBadge{
+  font-family:var(--font-display);font-weight:800;font-size:clamp(11.5px,1.5vw,13px);
+  color:#94a3b8;margin-top:3px;letter-spacing:.4px;
+}
+.progressBadge.leading{color:#fde68a}
+.progressBar{height:5px;background:#1c2536;border-radius:99px;margin-top:5px;overflow:hidden;min-width:90px}
+.progressBarFill{height:100%;border-radius:99px;background:linear-gradient(90deg,#22c55e,#facc15,#f97316);transition:width .4s ease}
+
 .footer{text-align:center;color:#4b4b5c;font-size:11px;font-weight:600;padding:26px 0 4px;letter-spacing:.3px}
 </style>
 </head>
@@ -90,7 +124,7 @@ h1{
 <div class="wrap">
   <div class="top">
     <div>
-      <span class="badge">🏁 COMPANY FUN RACE 2026</span>
+      <span class="badge">🏁 SCI FUN RACE PART 2 2027</span>
       <h1>LIVE LEADERBOARD</h1>
     </div>
     <div style="text-align:right">
@@ -99,6 +133,8 @@ h1{
     </div>
   </div>
 
+  <div id="leaderBanner"></div>
+
   <div class="section-title">🏆 Finished (fastest time first)</div>
   <div id="finished" class="rows"></div>
 
@@ -106,13 +142,21 @@ h1{
   <div id="pending" class="rows"></div>
 </div>
 
-<div class="footer">🏎️ FUN RACE 2026 &nbsp;•&nbsp; LIVE DATA FROM GOOGLE SHEET</div>
+<div class="footer">🏎️ FUN RACE PART 2 2027 &nbsp;•&nbsp; LIVE DATA FROM GOOGLE SHEET</div>
 
 <script>
 // ---- Configuration ----
-const SHEET_ID = "1FWOx0wLlgACMP_QgYpavaYafMzsKZM1ons2-mBm88Bs";
-const GID = "0";
-const CSV_URL = "https://docs.google.com/spreadsheets/d/" + SHEET_ID + "/gviz/tq?tqx=out:csv&gid=" + GID;
+// Everything the leaderboard shows (finished ranking, live "in
+// progress" timers, current-leader progress) is read from the SAME
+// Apps Script backend the Game Portal talks to, via JSONP (<script>
+// tag). This deliberately avoids fetch() + Google Sheets CSV/CORS —
+// a plain fetch() gets blocked with "Access to fetch... blocked by
+// CORS policy... origin 'null'" whenever this page is opened as a
+// local file:// page (which is exactly how it's meant to be used —
+// downloaded and opened straight from a laptop for the venue screen).
+// JSONP has no such restriction: it works identically whether this
+// page is opened locally or hosted online.
+const BACKEND = "https://script.google.com/macros/s/AKfycbw-pDNFmpM_fciXaTicPthAAnTMUARyDvN38ytjRRT_RNgdBl0dosnWnIg-HYxusJCwjA/exec";
 const REFRESH_MS = 8000;
 
 // Fixed team list so all 6 teams always show, even before any row exists.
@@ -128,47 +172,6 @@ const TEAM_NAMES = {
 
 let liveTimerHandle = null;
 
-function parseCSV(text){
-  const rows=[];
-  let row=[],field="",inQuotes=false;
-  for(let i=0;i<text.length;i++){
-    const c=text[i];
-    if(inQuotes){
-      if(c==='"'){
-        if(text[i+1]==='"'){field+='"';i++;}
-        else inQuotes=false;
-      }else field+=c;
-    }else{
-      if(c==='"')inQuotes=true;
-      else if(c===','){row.push(field);field="";}
-      else if(c==='\n'||c==='\r'){
-        if(c==='\r'&&text[i+1]==='\n')i++;
-        row.push(field);field="";
-        if(row.length>1||row[0]!=="")rows.push(row);
-        row=[];
-      }else field+=c;
-    }
-  }
-  if(field.length||row.length){row.push(field);if(row.length>1||row[0]!=="")rows.push(row);}
-  return rows;
-}
-
-function parseSheetDate(str){
-  // Expected format: DD/MM/YYYY HH:MM:SS
-  if(!str)return null;
-  const m=str.trim().match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})\s+(\d{1,2}):(\d{2}):(\d{2})$/);
-  if(!m)return null;
-  const [,dd,mm,yyyy,hh,mi,ss]=m.map(Number);
-  return new Date(yyyy,mm-1,dd,hh,mi,ss);
-}
-
-function durationToSeconds(str){
-  if(!str)return Infinity;
-  const parts=str.split(":").map(Number);
-  if(parts.length!==3||parts.some(isNaN))return Infinity;
-  return parts[0]*3600+parts[1]*60+parts[2];
-}
-
 function formatElapsed(ms){
   const total=Math.max(0,Math.floor(ms/1000));
   const h=Math.floor(total/3600);
@@ -177,60 +180,115 @@ function formatElapsed(ms){
   return [h,m,s].map(v=>String(v).padStart(2,"0")).join(":");
 }
 
-async function fetchStandings(){
-  const res=await fetch(CSV_URL+"&_="+Date.now(),{cache:"no-store"});
-  if(!res.ok)throw new Error("HTTP "+res.status);
-  const text=await res.text();
-  const rows=parseCSV(text);
-  if(rows.length<2)return {};
+// ---- JSONP helper (same pattern as the Game Portal) — Apps Script
+// Web Apps don't send CORS headers for plain fetch(), so cross-origin
+// reads go through a <script> tag callback instead. ----
+function jsonp(params, timeoutMs){
+  return new Promise(resolve=>{
+    const callbackName="fr_lb_"+Date.now()+"_"+Math.random().toString(36).slice(2);
+    const script=document.createElement("script");
+    const query=new URLSearchParams({...params,callback:callbackName});
+    let finished=false;
 
-  const header=rows[0].map(h=>h.trim());
-  const idx=name=>header.indexOf(name);
-  const iEvent=idx("Event"), iTeamId=idx("Team ID"), iTeamName=idx("Team Name"),
-        iStart=idx("Start Time"), iFinish=idx("Finish Time"), iDuration=idx("Game Duration");
-
-  // Latest row per team wins (sheet is append-only in chronological order).
-  const latest={};
-  for(let r=1;r<rows.length;r++){
-    const row=rows[r];
-    const teamId=(row[iTeamId]||"").trim();
-    if(!teamId)continue;
-    latest[teamId]={
-      event:(row[iEvent]||"").trim(),
-      teamName:(row[iTeamName]||"").trim() || TEAM_NAMES[teamId] || teamId,
-      startTime:row[iStart],
-      finishTime:row[iFinish],
-      duration:row[iDuration]
+    const cleanup=()=>{
+      if(finished)return;
+      finished=true;
+      if(script.parentNode)script.parentNode.removeChild(script);
+      try{delete window[callbackName]}catch(e){}
     };
-  }
-  return latest;
+
+    const timeout=setTimeout(()=>{cleanup();resolve(null);},timeoutMs||12000);
+
+    window[callbackName]=(data)=>{clearTimeout(timeout);cleanup();resolve(data);};
+    script.onerror=()=>{clearTimeout(timeout);cleanup();resolve(null);};
+    script.src=BACKEND+"?"+query.toString();
+    document.body.appendChild(script);
+  });
 }
 
-function render(latest){
+async function fetchTeams(){
+  const r=await jsonp({action:"progress"});
+  if(!r||!r.ok||!Array.isArray(r.teams))return null;
+  const map={};
+  r.teams.forEach(t=>{map[t.team]=t;});
+  return map;
+}
+
+function render(teamsMap){
   const finishedEl=document.getElementById("finished");
   const pendingEl=document.getElementById("pending");
+  const bannerEl=document.getElementById("leaderBanner");
 
   const finished=[];
   const pending=[];
 
   TEAM_ORDER.forEach(teamId=>{
-    const rec=latest[teamId];
+    const rec=teamsMap[teamId];
     const teamName=(rec&&rec.teamName)||TEAM_NAMES[teamId]||teamId;
+    const tasksDone=rec?rec.tasksDone:0;
 
-    if(rec&&rec.event==="COMPLETED"){
+    if(rec&&rec.status==="COMPLETED"){
+      const durationMs=Number(rec.durationMs);
       finished.push({
         teamId, teamName,
-        durationText:rec.duration||"--:--:--",
-        durationSec:durationToSeconds(rec.duration)
+        durationText:isFinite(durationMs)?formatElapsed(durationMs):"--:--:--",
+        durationSec:isFinite(durationMs)?durationMs/1000:Infinity
       });
-    }else if(rec&&rec.event==="STARTED"){
-      pending.push({teamId,teamName,status:"running",startTime:parseSheetDate(rec.startTime)});
+    }else if(rec&&rec.status==="RUNNING"){
+      pending.push({teamId,teamName,status:"running",startMs:rec.startMs,tasksDone:tasksDone});
     }else{
-      pending.push({teamId,teamName,status:"waiting"});
+      pending.push({teamId,teamName,status:"waiting",tasksDone:0});
     }
   });
 
   finished.sort((a,b)=>a.durationSec-b.durationSec);
+
+  // Running teams first, ranked by progress (most colours unlocked wins);
+  // ties broken by earliest start time. "Not started" teams sink to the
+  // bottom — there's nothing to rank them on yet.
+  pending.sort((a,b)=>{
+    if(a.status!==b.status)return a.status==="running"?-1:1;
+    if(a.status==="running"){
+      if(b.tasksDone!==a.tasksDone)return b.tasksDone-a.tasksDone;
+      const as=a.startMs?Number(a.startMs):Infinity;
+      const bs=b.startMs?Number(b.startMs):Infinity;
+      return as-bs;
+    }
+    return 0;
+  });
+
+  // ---- "Current leader" banner ----
+  // A team that has actually FINISHED always outranks a team that's
+  // merely in progress — finishing is the whole point, so the fastest
+  // completed time is the real leader whenever one exists. Only when
+  // NO team has finished yet do we fall back to showing the RUNNING
+  // team with the most colours unlocked, as a "leading so far" signal.
+  const runningWithProgress=pending.filter(t=>t.status==="running"&&t.tasksDone>0);
+  if(finished.length>0){
+    const leader=finished[0];
+    const tied=finished.filter(t=>t.durationSec===leader.durationSec).length>1;
+    bannerEl.innerHTML=
+      '<div class="leaderIcon">🏆</div>'+
+      '<div>'+
+        '<div class="leaderLabel">'+(tied?"Tied for the win":"Current Leader")+'</div>'+
+        '<div class="leaderName">'+escapeHtml(leader.teamName)+'</div>'+
+        '<div class="leaderSub">'+escapeHtml(leader.teamId)+' &nbsp;•&nbsp; finished</div>'+
+      '</div>'+
+      '<div class="leaderProgress"><b>'+escapeHtml(leader.durationText)+'</b><span>fastest time</span></div>';
+  }else if(runningWithProgress.length>0){
+    const leader=runningWithProgress[0];
+    const tied=runningWithProgress.filter(t=>t.tasksDone===leader.tasksDone).length>1;
+    bannerEl.innerHTML=
+      '<div class="leaderIcon">🔥</div>'+
+      '<div>'+
+        '<div class="leaderLabel">'+(tied?"Tied for the lead":"Current Leader")+'</div>'+
+        '<div class="leaderName">'+escapeHtml(leader.teamName)+'</div>'+
+        '<div class="leaderSub">'+escapeHtml(leader.teamId)+' &nbsp;•&nbsp; in progress</div>'+
+      '</div>'+
+      '<div class="leaderProgress"><b>'+leader.tasksDone+'/6</b><span>colours unlocked</span></div>';
+  }else{
+    bannerEl.innerHTML="";
+  }
 
   finishedEl.innerHTML="";
   if(finished.length===0){
@@ -254,15 +312,22 @@ function render(latest){
   if(pending.length===0){
     pendingEl.innerHTML='<div class="empty">All teams have finished! 🎉</div>';
   }else{
+    const leaderTasksDone=runningWithProgress.length>0?runningWithProgress[0].tasksDone:-1;
     pending.forEach(team=>{
       const div=document.createElement("div");
       div.className="row";
       const statusLabel=team.status==="running"?"IN PROGRESS":"NOT STARTED";
       const statusClass=team.status==="running"?"running":"waiting";
+      const isLeading=team.status==="running"&&team.tasksDone>0&&team.tasksDone===leaderTasksDone;
+      const progressHtml=team.status==="running"
+        ? '<div class="progressBadge'+(isLeading?" leading":"")+'">'+team.tasksDone+'/6 colours'+
+          (isLeading?" 🔥":"")+'</div>'+
+          '<div class="progressBar"><div class="progressBarFill" style="width:'+(team.tasksDone/6*100)+'%"></div></div>'
+        : '';
       div.innerHTML=
         '<div class="rank">—</div>'+
-        '<div class="teamInfo"><b>'+escapeHtml(team.teamName)+'</b><span>'+escapeHtml(team.teamId)+'</span></div>'+
-        '<div class="status '+statusClass+'" data-team="'+escapeHtml(team.teamId)+'" data-start="'+(team.startTime?team.startTime.getTime():"")+'">'+
+        '<div class="teamInfo"><b>'+escapeHtml(team.teamName)+'</b><span>'+escapeHtml(team.teamId)+'</span>'+progressHtml+'</div>'+
+        '<div class="status '+statusClass+'" data-team="'+escapeHtml(team.teamId)+'" data-start="'+(team.startMs?Number(team.startMs):"")+'">'+
           statusLabel+
           (team.status==="running"?'<span class="liveTimer">00:00:00</span>':'')+
         '</div>';
@@ -286,11 +351,12 @@ function tickLiveTimers(){
 
 async function refresh(){
   try{
-    const latest=await fetchStandings();
-    render(latest);
+    const teamsMap=await fetchTeams();
+    if(!teamsMap)throw new Error("No response from backend");
+    render(teamsMap);
     document.getElementById("updated").textContent="Last updated: "+new Date().toLocaleTimeString();
   }catch(err){
-    document.getElementById("updated").textContent="⚠ Unable to load standings — retrying…";
+    document.getElementById("updated").textContent="⚠ Unable to reach game server — retrying…";
   }
 }
 
