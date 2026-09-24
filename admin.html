@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>STAFF ADMIN — SCI FUN RACE PART 2 2027</title>
+<style>
+  :root{
+    --bg:#0b0f1a;
+    --panel:#131a2b;
+    --panel2:#1a2338;
+    --border:#2a3550;
+    --text:#eef1f8;
+    --muted:#8b96b3;
+    --accent:#ffb020;
+    --danger:#e5484d;
+    --danger2:#c93a3e;
+    --ok:#2ecc71;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    min-height:100vh;
+    background:radial-gradient(1200px 800px at 50% -10%, #1c2540 0%, var(--bg) 60%);
+    color:var(--text);
+    font-family:'Segoe UI',Roboto,Arial,sans-serif;
+    text-align:center;
+    padding:24px 16px 60px;
+  }
+  .wrap{max-width:520px;margin:0 auto;}
+  .badge{
+    display:inline-block;
+    background:linear-gradient(135deg,#ff4d4d,#ff9a3c);
+    color:#1a1200;
+    font-weight:800;
+    font-size:12px;
+    letter-spacing:1px;
+    padding:6px 14px;
+    border-radius:999px;
+    margin-bottom:10px;
+  }
+  h1{
+    font-size:22px;
+    margin:6px 0 4px;
+  }
+  .sub{
+    color:var(--muted);
+    font-size:13px;
+    margin-bottom:26px;
+  }
+  .warnBox{
+    background:rgba(229,72,77,0.1);
+    border:1px solid rgba(229,72,77,0.4);
+    color:#ffb3b5;
+    border-radius:12px;
+    padding:12px 14px;
+    font-size:13px;
+    line-height:1.5;
+    margin-bottom:22px;
+    text-align:left;
+  }
+  .panel{
+    background:var(--panel);
+    border:1px solid var(--border);
+    border-radius:16px;
+    padding:22px;
+    text-align:left;
+  }
+  label{
+    display:block;
+    font-size:12px;
+    font-weight:700;
+    letter-spacing:0.5px;
+    color:var(--muted);
+    text-transform:uppercase;
+    margin:16px 0 6px;
+  }
+  label:first-of-type{margin-top:0;}
+  select,input[type="password"],input[type="text"]{
+    width:100%;
+    background:var(--panel2);
+    border:1px solid var(--border);
+    color:var(--text);
+    font-size:15px;
+    padding:12px 14px;
+    border-radius:10px;
+    outline:none;
+    font-family:inherit;
+  }
+  select:focus,input:focus{border-color:var(--accent);}
+  .pwRow{position:relative;}
+  .pwToggle{
+    position:absolute;
+    right:10px;
+    top:50%;
+    transform:translateY(-50%);
+    background:none;
+    border:none;
+    color:var(--muted);
+    font-size:12px;
+    cursor:pointer;
+    padding:6px;
+  }
+  .btnRow{margin-top:24px;}
+  button.reset{
+    width:100%;
+    padding:14px;
+    border-radius:10px;
+    border:none;
+    font-size:15px;
+    font-weight:800;
+    letter-spacing:0.5px;
+    cursor:pointer;
+    background:linear-gradient(135deg,var(--danger),var(--danger2));
+    color:#fff;
+  }
+  button.reset:disabled{
+    opacity:0.5;
+    cursor:not-allowed;
+  }
+  button.reset:active:not(:disabled){transform:scale(0.98);}
+  #status{
+    margin-top:16px;
+    font-size:13px;
+    min-height:18px;
+    white-space:pre-wrap;
+  }
+  #status.ok{color:var(--ok);}
+  #status.err{color:var(--danger);}
+  #status.pending{color:var(--muted);}
+  .footer{
+    margin-top:28px;
+    font-size:11px;
+    color:var(--muted);
+  }
+
+  /* Confirm modal */
+  .overlay{
+    display:none;
+    position:fixed;
+    inset:0;
+    background:rgba(0,0,0,0.6);
+    align-items:center;
+    justify-content:center;
+    z-index:50;
+    padding:20px;
+  }
+  .overlay.show{display:flex;}
+  .modal{
+    background:var(--panel);
+    border:1px solid var(--border);
+    border-radius:16px;
+    padding:24px;
+    max-width:380px;
+    width:100%;
+    text-align:center;
+  }
+  .modal h2{
+    font-size:17px;
+    margin:0 0 10px;
+    color:var(--danger);
+  }
+  .modal p{
+    font-size:14px;
+    color:var(--muted);
+    line-height:1.5;
+    margin:0 0 20px;
+  }
+  .modal b{color:var(--text);}
+  .modalBtns{
+    display:flex;
+    gap:10px;
+  }
+  .modalBtns button{
+    flex:1;
+    padding:12px;
+    border-radius:10px;
+    border:none;
+    font-size:14px;
+    font-weight:700;
+    cursor:pointer;
+  }
+  .btnCancel{
+    background:var(--panel2);
+    color:var(--text);
+    border:1px solid var(--border) !important;
+  }
+  .btnConfirm{
+    background:linear-gradient(135deg,var(--danger),var(--danger2));
+    color:#fff;
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="badge">STAFF ONLY</div>
+  <h1>SCI FUN RACE PART 2 2027</h1>
+  <div class="sub">Admin Reset Panel</div>
+
+  <div class="warnBox">
+    ⚠️ Page ni untuk STAFF sahaja. Jangan kongsi link ni dengan peserta.
+    Reset akan padam progress team serta-merta dan <b>tidak boleh undo</b>.
+  </div>
+
+  <div class="panel">
+    <label for="teamSelect">Team</label>
+    <select id="teamSelect">
+      <option value="TEAM 1">TEAM 1</option>
+      <option value="TEAM 2">TEAM 2</option>
+      <option value="TEAM 3">TEAM 3</option>
+      <option value="TEAM 4">TEAM 4</option>
+      <option value="TEAM 5">TEAM 5</option>
+      <option value="TEAM 6">TEAM 6</option>
+      <option value="ALL">ALL TEAMS (reset semua)</option>
+    </select>
+
+    <label for="secretInput">Admin Secret</label>
+    <div class="pwRow">
+      <input type="password" id="secretInput" placeholder="Masukkan ADMIN_SECRET" autocomplete="off" spellcheck="false">
+      <button type="button" class="pwToggle" id="pwToggle">SHOW</button>
+    </div>
+
+    <div class="btnRow">
+      <button class="reset" id="resetBtn">RESET TEAM</button>
+    </div>
+
+    <div id="status"></div>
+  </div>
+
+  <div class="footer">Secret ini TIDAK disimpan dalam page ini — anda perlu taip setiap kali.</div>
+</div>
+
+<div class="overlay" id="overlay">
+  <div class="modal">
+    <h2>⚠️ Sahkan Reset</h2>
+    <p>Anda akan reset <b id="confirmTeamName">TEAM X</b>.<br>Progress akan hilang serta-merta dan <b>tidak boleh undo</b>. Teruskan?</p>
+    <div class="modalBtns">
+      <button class="btnCancel" id="cancelBtn">Batal</button>
+      <button class="btnConfirm" id="confirmBtn">Ya, Reset</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  const BACKEND = "https://script.google.com/macros/s/AKfycbw-pDNFmpM_fciXaTicPthAAnTMUARyDvN38ytjRRT_RNgdBl0dosnWnIg-HYxusJCwjA/exec";
+
+  const teamSelect = document.getElementById("teamSelect");
+  const secretInput = document.getElementById("secretInput");
+  const pwToggle = document.getElementById("pwToggle");
+  const resetBtn = document.getElementById("resetBtn");
+  const statusEl = document.getElementById("status");
+  const overlay = document.getElementById("overlay");
+  const confirmTeamName = document.getElementById("confirmTeamName");
+  const cancelBtn = document.getElementById("cancelBtn");
+  const confirmBtn = document.getElementById("confirmBtn");
+
+  pwToggle.addEventListener("click", () => {
+    const show = secretInput.type === "password";
+    secretInput.type = show ? "text" : "password";
+    pwToggle.textContent = show ? "HIDE" : "SHOW";
+  });
+
+  function setStatus(msg, kind) {
+    statusEl.textContent = msg;
+    statusEl.className = kind || "";
+  }
+
+  function jsonp(params, timeoutMs) {
+    return new Promise((resolve, reject) => {
+      const cbName = "jsonp_cb_" + Date.now() + "_" + Math.floor(Math.random() * 1e6);
+      const script = document.createElement("script");
+      let done = false;
+
+      const cleanup = () => {
+        delete window[cbName];
+        if (script.parentNode) script.parentNode.removeChild(script);
+        clearTimeout(timer);
+      };
+
+      window[cbName] = (data) => {
+        if (done) return;
+        done = true;
+        cleanup();
+        resolve(data);
+      };
+
+      const timer = setTimeout(() => {
+        if (done) return;
+        done = true;
+        cleanup();
+        reject(new Error("Timeout — tiada respons dari server."));
+      }, timeoutMs || 15000);
+
+      const qs = Object.keys(params)
+        .map(k => encodeURIComponent(k) + "=" + encodeURIComponent(params[k]))
+        .join("&");
+      script.src = BACKEND + "?" + qs + "&callback=" + cbName + "&_=" + Date.now();
+      script.onerror = () => {
+        if (done) return;
+        done = true;
+        cleanup();
+        reject(new Error("Gagal sambung ke server."));
+      };
+      document.body.appendChild(script);
+    });
+  }
+
+  resetBtn.addEventListener("click", () => {
+    const team = teamSelect.value;
+    const secret = secretInput.value.trim();
+
+    if (!secret) {
+      setStatus("Sila masukkan Admin Secret dahulu.", "err");
+      secretInput.focus();
+      return;
+    }
+
+    confirmTeamName.textContent = team === "ALL" ? "SEMUA TEAM" : team;
+    overlay.classList.add("show");
+  });
+
+  cancelBtn.addEventListener("click", () => {
+    overlay.classList.remove("show");
+  });
+
+  overlay.addEventListener("click", (e) => {
+    if (e.target === overlay) overlay.classList.remove("show");
+  });
+
+  confirmBtn.addEventListener("click", async () => {
+    overlay.classList.remove("show");
+    const team = teamSelect.value;
+    const secret = secretInput.value.trim();
+
+    resetBtn.disabled = true;
+    setStatus("Menghantar reset...", "pending");
+
+    try {
+      const r = await jsonp({ action: "reset", team: team, secret: secret });
+      if (r && r.ok) {
+        setStatus("✅ " + (r.message || "Reset berjaya."), "ok");
+      } else {
+        setStatus("❌ " + (r && r.message ? r.message : "Reset gagal."), "err");
+      }
+    } catch (err) {
+      setStatus("❌ Ralat: " + err.message, "err");
+    } finally {
+      resetBtn.disabled = false;
+    }
+  });
+</script>
+</body>
+</html>
