@@ -118,6 +118,44 @@ h1{
 .progressBarFill{height:100%;border-radius:99px;background:linear-gradient(90deg,#22c55e,#facc15,#f97316);transition:width .4s ease}
 
 .footer{text-align:center;color:#4b4b5c;font-size:11px;font-weight:600;padding:26px 0 4px;letter-spacing:.3px}
+
+/* ---- Staff-only reset control (tucked away, not part of the public display) ---- */
+.adminGear{
+  position:fixed;right:14px;bottom:14px;width:34px;height:34px;border-radius:50%;
+  background:rgba(11,17,29,.55);border:1px solid rgba(71,85,105,.4);
+  color:#3a4356;font-size:15px;display:flex;align-items:center;justify-content:center;
+  cursor:pointer;opacity:.35;transition:opacity .2s ease,color .2s ease;z-index:40;
+}
+.adminGear:hover{opacity:1;color:#94a3b8}
+.overlay{
+  display:none;position:fixed;inset:0;background:rgba(0,0,0,.65);
+  align-items:center;justify-content:center;z-index:50;padding:20px;
+}
+.overlay.show{display:flex}
+.modal{
+  background:#131a2b;border:1px solid #2a3550;border-radius:16px;
+  padding:22px;max-width:380px;width:100%;text-align:left;
+}
+.modal h2{font-family:var(--font-display);font-size:16px;margin-bottom:4px;color:#f8fafc}
+.modal .modalSub{color:#8b96b3;font-size:12px;margin-bottom:16px}
+.modal label{display:block;font-size:11px;font-weight:700;letter-spacing:.5px;color:#8b96b3;text-transform:uppercase;margin:14px 0 6px}
+.modal label:first-of-type{margin-top:0}
+.modal select,.modal input{
+  width:100%;background:#0b1019;border:1px solid #2a3550;color:#f8fafc;
+  font-size:14px;padding:10px 12px;border-radius:9px;outline:none;font-family:inherit;
+}
+.modal select:focus,.modal input:focus{border-color:#facc15}
+.modalBtns{display:flex;gap:10px;margin-top:18px}
+.modalBtns button{flex:1;padding:11px;border-radius:9px;border:none;font-size:13px;font-weight:700;cursor:pointer}
+.btnCancel{background:#1a2338;color:#f8fafc;border:1px solid #2a3550 !important}
+.btnDanger{background:linear-gradient(135deg,#e5484d,#c93a3e);color:#fff}
+.btnDanger:disabled{opacity:.5;cursor:not-allowed}
+#adminStatus{margin-top:12px;font-size:12px;min-height:16px}
+#adminStatus.ok{color:#2ecc71}
+#adminStatus.err{color:#e5484d}
+#adminStatus.pending{color:#8b96b3}
+.confirmBox{display:none}
+.confirmBox.show{display:block}
 </style>
 </head>
 <body>
@@ -143,6 +181,49 @@ h1{
 </div>
 
 <div class="footer">🏎️ FUN RACE PART 2 2027 &nbsp;•&nbsp; LIVE DATA FROM GOOGLE SHEET</div>
+
+<!-- Staff-only reset control. Small, low-opacity, bottom corner — not
+     meant to be noticed by spectators/participants watching this screen.
+     No secret is stored in this page; staff must type it each time. -->
+<div class="adminGear" id="adminGear" title="Staff reset">⚙</div>
+
+<div class="overlay" id="adminOverlay">
+  <div class="modal">
+    <div id="formView">
+      <h2>⚠️ Staff Reset</h2>
+      <div class="modalSub">Ini akan padam progress team serta-merta. Tidak boleh undo.</div>
+
+      <label for="resetTeamSelect">Team</label>
+      <select id="resetTeamSelect">
+        <option value="TEAM 1">TEAM 1</option>
+        <option value="TEAM 2">TEAM 2</option>
+        <option value="TEAM 3">TEAM 3</option>
+        <option value="TEAM 4">TEAM 4</option>
+        <option value="TEAM 5">TEAM 5</option>
+        <option value="TEAM 6">TEAM 6</option>
+        <option value="ALL">ALL TEAMS (reset semua)</option>
+      </select>
+
+      <label for="resetSecretInput">Admin Secret</label>
+      <input type="password" id="resetSecretInput" placeholder="Masukkan ADMIN_SECRET" autocomplete="off" spellcheck="false">
+
+      <div class="modalBtns">
+        <button class="btnCancel" id="adminCancelBtn">Tutup</button>
+        <button class="btnDanger" id="adminResetBtn">Reset</button>
+      </div>
+      <div id="adminStatus"></div>
+    </div>
+
+    <div id="confirmView" class="confirmBox">
+      <h2>⚠️ Sahkan Reset</h2>
+      <div class="modalSub">Anda akan reset <b id="confirmTeamLabel">TEAM X</b>. Progress hilang serta-merta, tidak boleh undo. Teruskan?</div>
+      <div class="modalBtns">
+        <button class="btnCancel" id="confirmCancelBtn">Batal</button>
+        <button class="btnDanger" id="confirmYesBtn">Ya, Reset</button>
+      </div>
+    </div>
+  </div>
+</div>
 
 <script>
 // ---- Configuration ----
@@ -364,6 +445,82 @@ refresh();
 setInterval(refresh,REFRESH_MS);
 clearInterval(liveTimerHandle);
 liveTimerHandle=setInterval(tickLiveTimers,1000);
+
+// ---- Staff-only reset control ----
+(function(){
+  const gear=document.getElementById("adminGear");
+  const overlay=document.getElementById("adminOverlay");
+  const formView=document.getElementById("formView");
+  const confirmView=document.getElementById("confirmView");
+  const teamSelect=document.getElementById("resetTeamSelect");
+  const secretInput=document.getElementById("resetSecretInput");
+  const resetBtn=document.getElementById("adminResetBtn");
+  const cancelBtn=document.getElementById("adminCancelBtn");
+  const confirmCancelBtn=document.getElementById("confirmCancelBtn");
+  const confirmYesBtn=document.getElementById("confirmYesBtn");
+  const confirmTeamLabel=document.getElementById("confirmTeamLabel");
+  const statusEl=document.getElementById("adminStatus");
+
+  function setStatus(msg,kind){
+    statusEl.textContent=msg||"";
+    statusEl.className=kind||"";
+  }
+
+  function openModal(){
+    formView.style.display="";
+    confirmView.classList.remove("show");
+    setStatus("","");
+    overlay.classList.add("show");
+  }
+  function closeModal(){
+    overlay.classList.remove("show");
+  }
+
+  gear.addEventListener("click",openModal);
+  cancelBtn.addEventListener("click",closeModal);
+  overlay.addEventListener("click",e=>{ if(e.target===overlay) closeModal(); });
+
+  resetBtn.addEventListener("click",()=>{
+    const secret=secretInput.value.trim();
+    if(!secret){
+      setStatus("Sila masukkan Admin Secret dahulu.","err");
+      secretInput.focus();
+      return;
+    }
+    const team=teamSelect.value;
+    confirmTeamLabel.textContent=team==="ALL"?"SEMUA TEAM":team;
+    formView.style.display="none";
+    confirmView.classList.add("show");
+  });
+
+  confirmCancelBtn.addEventListener("click",()=>{
+    confirmView.classList.remove("show");
+    formView.style.display="";
+  });
+
+  confirmYesBtn.addEventListener("click",async ()=>{
+    const team=teamSelect.value;
+    const secret=secretInput.value.trim();
+    confirmView.classList.remove("show");
+    formView.style.display="";
+    resetBtn.disabled=true;
+    setStatus("Menghantar reset...","pending");
+    try{
+      const r=await jsonp({action:"reset",team:team,secret:secret},15000);
+      if(r&&r.ok){
+        setStatus("✅ "+(r.message||"Reset berjaya."),"ok");
+        secretInput.value="";
+        refresh();
+      }else{
+        setStatus("❌ "+(r&&r.message?r.message:"Reset gagal / tiada respons."),"err");
+      }
+    }catch(err){
+      setStatus("❌ Ralat: "+err.message,"err");
+    }finally{
+      resetBtn.disabled=false;
+    }
+  });
+})();
 </script>
 </body>
 </html>
