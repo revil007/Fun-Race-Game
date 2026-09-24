@@ -173,7 +173,7 @@ h1{
 
   <div id="leaderBanner"></div>
 
-  <div class="section-title">🏆 Finished (fastest time first)</div>
+  <div class="section-title">🏆 Finished</div>
   <div id="finished" class="rows"></div>
 
   <div class="section-title">⏱ In Progress / Not Started</div>
@@ -353,7 +353,6 @@ function render(teamsMap){
       '<div>'+
         '<div class="leaderLabel">'+(tied?"Tied for the win":"Current Leader")+'</div>'+
         '<div class="leaderName">'+escapeHtml(leader.teamName)+'</div>'+
-        '<div class="leaderSub">'+escapeHtml(leader.teamId)+' &nbsp;•&nbsp; finished</div>'+
       '</div>'+
       '<div class="leaderProgress"><b>'+escapeHtml(leader.durationText)+'</b><span>fastest time</span></div>';
   }else if(runningWithProgress.length>0){
@@ -364,7 +363,6 @@ function render(teamsMap){
       '<div>'+
         '<div class="leaderLabel">'+(tied?"Tied for the lead":"Current Leader")+'</div>'+
         '<div class="leaderName">'+escapeHtml(leader.teamName)+'</div>'+
-        '<div class="leaderSub">'+escapeHtml(leader.teamId)+' &nbsp;•&nbsp; in progress</div>'+
       '</div>'+
       '<div class="leaderProgress"><b>'+leader.tasksDone+'/6</b><span>colours unlocked</span></div>';
   }else{
@@ -383,7 +381,7 @@ function render(teamsMap){
       div.className="row "+rowClass;
       div.innerHTML=
         '<div class="rank'+(medal?" medal":"")+'">'+(medal||rank)+'</div>'+
-        '<div class="teamInfo"><b>'+escapeHtml(team.teamName)+'</b><span>'+escapeHtml(team.teamId)+'</span></div>'+
+        '<div class="teamInfo"><b>'+escapeHtml(team.teamName)+'</b></div>'+
         '<div class="duration">'+escapeHtml(team.durationText)+'</div>';
       finishedEl.appendChild(div);
     });
@@ -407,7 +405,7 @@ function render(teamsMap){
         : '';
       div.innerHTML=
         '<div class="rank">—</div>'+
-        '<div class="teamInfo"><b>'+escapeHtml(team.teamName)+'</b><span>'+escapeHtml(team.teamId)+'</span>'+progressHtml+'</div>'+
+        '<div class="teamInfo"><b>'+escapeHtml(team.teamName)+'</b>'+progressHtml+'</div>'+
         '<div class="status '+statusClass+'" data-team="'+escapeHtml(team.teamId)+'" data-start="'+(team.startMs?Number(team.startMs):"")+'">'+
           statusLabel+
           (team.status==="running"?'<span class="liveTimer">00:00:00</span>':'')+
